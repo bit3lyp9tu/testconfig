@@ -9,3 +9,4 @@ test_report.txt
 
 src/demo_file.txt
 
+**/*.pyc
