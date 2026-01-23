@@ -1,0 +1,33 @@
+general_setup:
+    attributes:
+        path: "a_random_path"
+python:
+    file_setup:
+        attributes:
+            path: "new_path_overrides_old_one"
+        commands:
+           - "echo OVERRIDDEN"
+    src/tests/test.py:
+        function_setup:
+            attributes:
+                path: "src/tests"
+                target: "add"
+        function_shutdown:
+        tests:
+            add:
+                - 1,2,3 -> 6
+                - 4,5,6 -> 15
+                - -1,1,1 -> 1
+                - 10,-10,5 -> 5
+                - 0.5,0.5,0.5 -> 1.5
+                - 0.5,-0.5,0.5 -> 0.5
+            subtract:
+                - 10,5 -> 5
+            multiply:
+                csv_path: 'src/tests/data/test.csv'
+    file_shutdown:
+        commands:
+           - "echo SHUTDOWN"
+php:
+cpp:
+general_shutdown:

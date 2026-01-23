@@ -1,0 +1,6 @@
+mypy
+networkx
+matplotlib
+pyyaml
+types-PyYAML
+pytest

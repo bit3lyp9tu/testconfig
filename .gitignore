@@ -1,0 +1,11 @@
+.mypy_cache
+.pytest_cache
+
+tests/__pycache__/*
+
+env
+
+test_report.txt
+
+src/demo_file.txt
+

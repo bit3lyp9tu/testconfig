@@ -1,0 +1,59 @@
+config:
+    script_execution:
+       file_path: "$file_path"
+       command: "env/bin/python3 $file_path"
+    variable_infix_char: "%"
+    variables:
+        import_module: "%module%"
+        function_name: "%function_name%"
+        parameters: "%parameters%"
+        expected_result: "%expected_result%"
+        calculated_result: "%calculated_result%"
+unit-test:
+    syntax_scheme:
+        header_data:
+            import:
+                - 'import sys'
+                - 'import %module%'
+        single_test_code:
+            - is_equal_test:
+                scheme: 'if %module%.%function_name%(%parameters%) == %expected_result%:'
+            - is_unequal_test:
+                scheme: 'if %module%.%function_name%(%parameters%) != %expected_result%:'
+        if_success:
+            run:
+                exit_code: 0
+        if_failure:
+            run:
+                messages:
+                   - "\tprint('[FAIL] %module%.%function_name%(%parameters%) != %expected_result%')"
+                   - "\tsys.exit(1)"
+                exit_code: 1
+hooks:
+    general_setup:
+        attributes:
+            - "env_name"
+        commands:
+            - "echo Setting up environment"
+            # - "echo 'Installing Modules'"
+            # - "source $env_name/bin/activate"
+            # - "pip install -r src/requirements.txt >/dev/null 2>&1"
+        description: "Setup the environment before running the tests"
+    general_shutdown:
+        attributes:
+            - "path_old"
+        commands:
+            - "echo 'Closing down environment' in $path"
+        description: "Close down the environment after running the tests"
+    file_setup:
+        attributes:
+            path: "this_path_gets_overridden"
+        commands:
+           - "echo OVERRIDDEN"
+    file_shutdown:
+    function_setup:
+        attributes:
+            - "path"
+            - "target"
+    function_shutdown:
+        description: "none"
