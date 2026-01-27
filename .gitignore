@@ -13,3 +13,4 @@ src/demo_file.py
 tests/demo_file.py
 
 todo.md
+**/*.pyc
