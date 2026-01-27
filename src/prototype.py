@@ -27,5 +27,15 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-tester = RunController(args.config, args.lang_config_dict)
-ScriptBuilder(tester.start(args.test_path, bool(args.keep_script_files))).write(args.report)
+try:
+    tester = RunController(args.config, args.lang_config_dict)
+    ScriptBuilder(tester.start(args.test_path, bool(args.keep_script_files))).write(args.report)
+except Exception as e:
+    print(f"{e}")
+
+# python3 test.py (./test.py oder source pip install test)
+# -> innerhalb des python codes:
+#   -> generiert er als erstes das skript
+#   -> führt es dann mit subprocess oder so aus
+# -> INNERHALB dieser test.py
+# print(f"[FAIL] {testname} failed")

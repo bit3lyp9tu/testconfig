@@ -1,0 +1,10 @@
+general_setup:
+python:
+    file_setup:
+    tests/code/test.py:
+        function_setup:
+        function_shutdown:
+        tests:
+    file_shutdown:
+    tests/code/file_does_not_exists.py:
+general_shutdown:

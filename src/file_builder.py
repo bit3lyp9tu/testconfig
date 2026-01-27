@@ -5,7 +5,8 @@ import subprocess
 
 from pathlib import Path
 
-from config_parser import MainConfig, LangConfig, Hook, HookType
+from config_parser import MainConfig, LangConfig
+from hook import Hook, HookType
 
 
 class CodeBuilder:
@@ -16,9 +17,7 @@ class CodeBuilder:
     def getImports(self, language: str) -> list[str]:
         result: list[str] = []
 
-        script_path = self.mainConfig.getScripts(language)
-
-        module_name =  re.sub(r'src\.', '', script_path[0].split(".")[0].replace("/", "."))
+        script_path = self.mainConfig.getScripts(language)[0]
 
         variables = self.langConfig.getVariables()
         infix = self.langConfig.getVariableInfixChar()
@@ -26,8 +25,8 @@ class CodeBuilder:
         modules = self.langConfig.getHeaderData()
         for module in modules:
             header = module.replace(
-                variables["import_module"].replace(infix, ""),
-                module_name
+                variables["file_path"].replace(infix, ""),
+                script_path
             ).replace(
                 infix,
                 ""
@@ -39,36 +38,29 @@ class CodeBuilder:
     def getFunctionHead(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float]) -> str:
         script_path = self.mainConfig.getScripts(language)
 
-        module_name =  re.sub(r'src\.', '', script_path[0].split(".")[0].replace("/", "."))
+        module_name = ""
+        # re.sub(r'src\.', '', script_path[0].split(".")[0].replace("/", "."))
 
         variables = self.langConfig.getVariables()
         infix = self.langConfig.getVariableInfixChar()
 
         scheme = self.langConfig.getTestSyntaxScheme()["is_unequal_test"]
         test_header = scheme.replace(
-            variables["import_module"].replace(infix, ""),
-            module_name
-        ).replace(
-            variables["function_name"].replace(infix, ""),
+            f"{variables["function_name"]}",
             function_name
         ).replace(
-            variables["parameters"].replace(infix, ""),
+            f"{variables["parameters"]}",
             ",".join(str(i) for i in parameters)
         ).replace(
-            variables["expected_result"].replace(infix, ""),
+            f"{variables["expected_result"]}",
             str(expected_result[0])
-        ).replace(
-            infix,
-            ""
         )
         return test_header
 
     def getFunctionBody(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float]) -> list[str]:
         result: list[str] = []
 
-        script_path = self.mainConfig.getScripts(language)
-
-        module_name =  re.sub(r'src\.', '', script_path[0].split(".")[0].replace("/", "."))
+        script_path = self.mainConfig.getScripts(language)[0]
 
         fail_msg_lines = self.langConfig.getFailMessages()
 
@@ -77,20 +69,17 @@ class CodeBuilder:
 
         for fail_msg in fail_msg_lines:
             test_body = fail_msg.replace(
-                variables["import_module"].replace(infix, ""),
-                module_name
+                f"{variables["file_path"]}",
+                script_path
             ).replace(
-                variables["function_name"].replace(infix, ""),
+                f"{variables["function_name"]}",
                 function_name
             ).replace(
-                variables["parameters"].replace(infix, ""),
+                f"{variables["parameters"]}",
                 ",".join(str(i) for i in parameters)
             ).replace(
-                variables["expected_result"].replace(infix, ""),
+                f"{variables["expected_result"]}",
                 str(expected_result[0])
-            ).replace(
-                infix,
-                ""
             )
             result.append(test_body)
 
@@ -182,6 +171,8 @@ class RunController:
     def __init__(self, config_path: str, lang_path: str) -> None:
         self.mainConfig = MainConfig(config_path)
 
+        self.lang_path = lang_path
+
         self.langConfigs: dict = {}
         for language in self.mainConfig.getLanguages():
             path = f"{lang_path}/{language}.yaml"
@@ -212,7 +203,7 @@ class RunController:
             main_config_dict = hooks[str(hook_type).lower()].copy()
             lang_config_dict = {}
             if language != "" and language in self.mainConfig.getLanguages():
-                lang_config_dict = self.langConfigs[f"configs/lang/{language}.yaml"].getHook(hook_type).toDict().copy()
+                lang_config_dict = self.langConfigs[f"{self.lang_path}/{language}.yaml"].getHook(hook_type).toDict().copy()
             else:
                 lang_config_dict = {"result": "unsupported feature"}
 
@@ -226,7 +217,7 @@ class RunController:
                 return Hook(hook_type, {})
 
             main_config_dict = hooks[str(hook_type).lower()][language].copy()
-            lang_config_dict = self.langConfigs[f"configs/lang/{language}.yaml"].getHook(hook_type).toDict().copy()
+            lang_config_dict = self.langConfigs[f"{self.lang_path}/{language}.yaml"].getHook(hook_type).toDict().copy()
 
             if main_config_dict == None or main_config_dict == {}:
                 return Hook(hook_type, lang_config_dict)
@@ -238,7 +229,7 @@ class RunController:
                 return Hook(hook_type, {})
 
             main_config_dict = hooks[str(hook_type).lower()][language][file].copy()
-            lang_config_dict = self.langConfigs[f"configs/lang/{language}.yaml"].getHook(hook_type).toDict().copy()
+            lang_config_dict = self.langConfigs[f"{self.lang_path}/{language}.yaml"].getHook(hook_type).toDict().copy()
 
             if main_config_dict == None or main_config_dict == {}:
                 return Hook(hook_type, lang_config_dict)
@@ -296,10 +287,10 @@ class RunController:
                     output.append(f"[Test] exit code: {exit_code}")
 
                 #   delete script file
-                if keep_scripts == False:
-                    script_result, exit_code = ScriptBuilder([]).runCommand(f"rm {generated_file_name}")
-                    if script_result[-1] != "":
-                        output.extend(script_result)
+                # if keep_scripts == False:
+                #     script_result, exit_code = ScriptBuilder([]).runCommand(f"rm {generated_file_name}")
+                #     if script_result[-1] != "":
+                #         output.extend(script_result)
 
                 #   function shutdown hook
                 output.append("[Hook] load function shutdown...")
@@ -318,5 +309,7 @@ class RunController:
 
         return output
 
+    def validatePaths(self) -> None:
+        pass
 
 

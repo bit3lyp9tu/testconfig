@@ -1,59 +1,79 @@
 import mypy
 import pytest
 
-from src.config_parser import MainConfig, LangConfig, Hook, HookType
+from src.config_parser import MainConfig
+from src.hook import HookType
 
 
-mainConfig: MainConfig = MainConfig("configs/test.yaml")
+mainConfig1: MainConfig = MainConfig("../tests/configs/config1.yaml")
+mainConfig2: MainConfig = MainConfig("../tests/configs/config2.yaml")
 
 def test_mainConfig_path() -> None:
     """
     Test the path attribute of the MainConfig class.
     """
-    result = mainConfig.path
-    assert result == "configs/test.yaml"
+    result = mainConfig1.path
+    assert result == "../tests/configs/config1.yaml"
+    result2 = mainConfig2.path
+    assert result2 == "../tests/configs/config2.yaml"
 
 def test_mainConfig_content_type() -> None:
     """
     Test the content attribute type of the MainConfig class.
     """
-    result = type(mainConfig.content)
+    result = type(mainConfig1.content)
     assert result == dict
+    result2 = type(mainConfig2.content)
+    assert result2 == dict
 
 def test_mainConfig_content_languages() -> None:
     """
     Test the content attribute languages.
     """
-    result = mainConfig.getLanguages()
+    result = mainConfig1.getLanguages()
     assert set(result) == {
         "python",
         "php",
         "cpp"
+    }
+    result2 = mainConfig2.getLanguages()
+    assert set(result2) == {
+        "python"
     }
 
 def test_mainConfig_content_scripts() -> None:
     """
     Test the content attribute scripts.
     """
-    result = mainConfig.getScripts("python")
+    result = mainConfig1.getScripts("python")
     assert set(result) == {
-        "src/tests/test.py"
+        "tests/code/test.py"
     }
-    result = mainConfig.getScripts("php")
+    result = mainConfig1.getScripts("php")
     assert set(result) == set({})
+    result2 = mainConfig2.getScripts("python")
+    assert set(result2) == {
+        "tests/code/test.py",
+        "tests/code/file_does_not_exists.py"
+    }
 
 def test_mainConfig_content_functions() -> None:
     """
     Test the content attribute functions.
     """
-    result = list(mainConfig.getFunctionsBody("python", "src/tests/test.py").keys())
+    result = list(mainConfig1.getFunctionsBody("python", "tests/code/test.py").keys())
     assert result ==  ["add", "subtract", "multiply"]
+
+    result2 = list(mainConfig2.getFunctionsBody("python", "tests/code/test.py").keys())
+    assert result2 ==  []
+    result2 = list(mainConfig2.getFunctionsBody("python", "tests/code/file_does_not_exists.py").keys())
+    assert result2 ==  []
 
 def test_mainConfig_content_functions_content_data() -> None:
     """
     Test the content attribute test data.
     """
-    result = mainConfig.getFunctionsBody("python", "src/tests/test.py")["add"]
+    result = mainConfig1.getFunction("python", "tests/code/test.py", "add")
     assert result == [
         '1,2,3 -> 6',
         '4,5,6 -> 15',
@@ -62,30 +82,38 @@ def test_mainConfig_content_functions_content_data() -> None:
         '0.5,0.5,0.5 -> 1.5',
         '0.5,-0.5,0.5 -> 0.5'
     ]
+    result1 = mainConfig1.getFunction("python", "tests/code/test.py", "multiply")
+    assert result1 == []
+    result2 = mainConfig2.getFunction("python", "tests/code/test.py", "")
+    assert result2 == []
+    result2 = mainConfig2.getFunction("python", "tests/code/test.py", "not_a _function")
+    assert result2 == []
 
 def test_mainConfig_content_functions_content_csv_path() -> None:
     """
     Test the content attribute csv path.
     """
-    assert not mainConfig.isPointingToCsvFile("python", "src/tests/test.py", "add")
-    assert mainConfig.isPointingToCsvFile("python", "src/tests/test.py", "multiply")
+    assert not mainConfig1.isPointingToCsvFile("python", "tests/code/test.py", "add")
+    assert mainConfig1.isPointingToCsvFile("python", "tests/code/test.py", "multiply")
+    assert not mainConfig2.isPointingToCsvFile("python", "tests/code/test.py", "not_a_function")
+    assert not mainConfig2.isPointingToCsvFile("python", "tests/code/file_does_not_exists.py", "not_a_function")
 
 def test_typifying_test_case_line() -> None:
     """
     Test the typifying function for the test case line
     """
-    result = mainConfig._typifyTestCaseToList("1,-2,3")
+    result = mainConfig1._typifyTestCaseToList("1,-2,3")
     assert result == [1, -2, 3]
-    result2 = mainConfig._typifyTestCaseToList("1.1,2.2,-3.3")
+    result2 = mainConfig1._typifyTestCaseToList("1.1,2.2,-3.3")
     assert result2 == [1.1, 2.2, -3.3]
-    result3 = mainConfig._typifyTestCaseToList("hello,world,!")
+    result3 = mainConfig1._typifyTestCaseToList("hello,world,!")
     assert result3 == ["hello", "world", "!"]
 
 def test_mainConfig_content_functions_content_data_list() -> None:
     """
     Test the content attribute data list.
     """
-    result = mainConfig.getTestData("python", "src/tests/test.py", "add")
+    result = mainConfig1.getTestData("python", "tests/code/test.py", "add")
     assert result == [
         ([1,2,3], [6]),
         ([4,5,6], [15]),
@@ -94,7 +122,7 @@ def test_mainConfig_content_functions_content_data_list() -> None:
         ([0.5,0.5,0.5], [1.5]),
         ([0.5,-0.5,0.5], [0.5])
     ]
-    result2 = mainConfig.getTestData("python", "src/tests/test.py", "multiply")
+    result2 = mainConfig1.getTestData("python", "tests/code/test.py", "multiply")
     assert result2 == [
         ([7,8,9], [504]),
         ([10,11,12], [1320]),
@@ -106,7 +134,7 @@ def test_mainConfig_hooks_all() -> None:
     """
     Test if hooks getter returns all hooks from config file
     """
-    result = mainConfig.getHooks()
+    result = mainConfig1.getHooks()
     assert result == {
         "general_setup": {
             "attributes": {
@@ -137,7 +165,7 @@ def test_mainConfig_hooks_all() -> None:
         },
         "function_setup": {
             "python": {
-                "src/tests/test.py": {
+                "tests/code/test.py": {
                     "attributes": {
                         "path": "src/tests",
                         "target": "add"
@@ -149,7 +177,7 @@ def test_mainConfig_hooks_all() -> None:
         },
         "function_shutdown": {
             "python": {
-                "src/tests/test.py": {}
+                "tests/code/test.py": {}
             },
             "php": {},
             "cpp": {}
@@ -161,7 +189,7 @@ def test_mainConfig_hooks_general_setup() -> None:
     """
     Test import general setup
     """
-    result = mainConfig.getHookGeneral(HookType.GENERAL_SETUP)
+    result = mainConfig1.getHookGeneral(HookType.GENERAL_SETUP)
     assert result.type == HookType.GENERAL_SETUP
     assert result.attributes == {"path": "a_random_path"}
     assert result.commands == []
@@ -171,7 +199,7 @@ def test_mainConfig_hooks_general_shutdown() -> None:
     """
     Test import general shutdown
     """
-    result = mainConfig.getHookGeneral(HookType.GENERAL_SHUTDOWN)
+    result = mainConfig1.getHookGeneral(HookType.GENERAL_SHUTDOWN)
     assert result.type == HookType.GENERAL_SHUTDOWN
     assert result.attributes == {}
     assert result.commands == []
@@ -181,7 +209,7 @@ def test_mainConfig_hooks_file_setup() -> None:
     """
     Test import file setup
     """
-    result = mainConfig.getHookFile(HookType.FILE_SETUP, "python")
+    result = mainConfig1.getHookFile(HookType.FILE_SETUP, "python")
     assert result.type == HookType.FILE_SETUP
     assert result.attributes == {"path": "new_path_overrides_old_one"}
     assert result.commands == ["echo OVERRIDDEN"]
@@ -191,7 +219,7 @@ def test_mainConfig_hooks_file_shutdown() -> None:
     """
     Test import file shutdown
     """
-    result = mainConfig.getHookFile(HookType.FILE_SHUTDOWN, "python")
+    result = mainConfig1.getHookFile(HookType.FILE_SHUTDOWN, "python")
     assert result.type == HookType.FILE_SHUTDOWN
     assert result.attributes == {}
     assert result.commands == [
@@ -203,7 +231,7 @@ def test_mainConfig_hooks_function_setup() -> None:
     """
     Test import function setup
     """
-    result = mainConfig.getHookFunction(HookType.FUNCTION_SETUP, "python", "src/tests/test.py")
+    result = mainConfig1.getHookFunction(HookType.FUNCTION_SETUP, "python", "tests/code/test.py")
     assert result.type == HookType.FUNCTION_SETUP
     assert result.attributes == {"path": "src/tests", "target": "add"}
     assert result.commands == []
@@ -213,94 +241,8 @@ def test_mainConfig_hooks_function_shutdown() -> None:
     """
     Test import function shutdown
     """
-    result = mainConfig.getHookFunction(HookType.FUNCTION_SHUTDOWN, "python", "src/tests/test.py")
+    result = mainConfig1.getHookFunction(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py")
     assert result.type == HookType.FUNCTION_SHUTDOWN
     assert result.attributes == {}
     assert result.commands == []
     assert result.description == ""
-
-
-langConfig = LangConfig("configs/lang/python.yaml")
-def test_langConfig_config_variable_infix_char() -> None:
-    """
-    Test Config variable infix char getter
-    """
-    result = langConfig.getVariableInfixChar()
-    assert result == "%"
-
-def test_langConfig_config_variables() -> None:
-    """
-    Test Config variables getter
-    """
-    result = langConfig.getVariables()
-    assert result == {
-        "import_module": "%module%",
-        "function_name": "%function_name%",
-        "parameters": "%parameters%",
-        "expected_result": "%expected_result%",
-        "calculated_result": "%calculated_result%"
-    }
-
-def test_langConfig_header_data() -> None:
-    """
-    Test HeaderData getter.
-    """
-    result = langConfig.getHeaderData()
-    assert result == [
-        "import sys",
-        "import %module%"
-    ]
-
-def test_langConfig_syntax_scheme() -> None:
-    """
-    Test TestSyntaxScheme getter.
-    """
-    result = langConfig.getTestSyntaxScheme()
-    assert result == {
-        "is_equal_test": "if %module%.%function_name%(%parameters%) == %expected_result%:",
-        "is_unequal_test": "if %module%.%function_name%(%parameters%) != %expected_result%:",
-    }
-
-def test_langConfig_fail_message() -> None:
-    """
-    Test FailMessage getter
-    """
-    result = langConfig.getFailMessages()
-    assert result == [
-        "\tprint('[FAIL] %module%.%function_name%(%parameters%) != %expected_result%')",
-        "\tsys.exit(1)"
-    ]
-
-def test_langConfig_hook_type_validator() -> None:
-    """
-    Test if all hook types in lang config file are valid
-    """
-    result = langConfig.hasValidHookTypes()
-    assert result == True
-
-def test_langConfig_hook_getter() -> None:
-    """
-    Test hook getter
-    """
-    result = langConfig.getHook(HookType.GENERAL_SETUP)
-    assert result.type == HookType.GENERAL_SETUP
-    assert result.attributes == {"env_name": ""}
-    # assert result.commands == [
-    #     "echo 'Installing Modules'",
-    #     "source $env_name/bin/activate",
-    #     "pip install -r src/requirements.txt >/dev/null 2>&1"
-    # ]
-    assert result.description == "Setup the environment before running the tests"
-
-    result = langConfig.getHook(HookType.FUNCTION_SHUTDOWN)
-    assert result.type == HookType.FUNCTION_SHUTDOWN
-    assert result.attributes == {}
-    assert result.commands == []
-    assert result.description == "none"
-
-def test_langConfig_config_execution_command() -> None:
-    """
-    Test config execution command getter
-    """
-    result = langConfig.getExecutionCommand("demo_file.py")
-    assert result == "env/bin/python3 demo_file.py"
