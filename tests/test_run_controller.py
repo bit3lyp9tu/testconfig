@@ -118,6 +118,6 @@ def test_run_controller_start() -> None:
         "SHUTDOWN",
         "",
         "[Hook] load general shutdown...",
-        "'Closing down environment' in $path",
+        "'Closing down environment' in new_path_overrides_old_one",
         ""
     ]

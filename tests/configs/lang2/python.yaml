@@ -6,6 +6,10 @@ unit-test:
     syntax_scheme:
 hooks:
     general_setup:
+      attributes:
+        path: "a_random_path"
+      commands:
+        - "echo the stored path is $path"
     general_shutdown:
     file_setup:
     file_shutdown:

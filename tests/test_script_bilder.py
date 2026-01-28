@@ -10,16 +10,17 @@ def test_run_command_executor() -> None:
     Test the command executor for running scripts
     """
     script_builder = ScriptBuilder([])
+    assert script_builder.runCommand("") == ([], 0)
     assert script_builder.runCommand("ls -a") == ([
         ".",
         "..",
-        "env",
         ".git",
         ".gitignore",
         ".mypy_cache",
         ".pytest_cache",
-        "pytest.ini",
         "README.md",
+        "env",
+        "pytest.ini",
         "run.sh",
         "src",
         "test_report.txt",
@@ -30,6 +31,10 @@ def test_run_command_executor() -> None:
     ], 0)
     assert script_builder.runCommand("echo Hello World!") == ([
         "Hello World!",
+        ""
+    ], 0)
+    assert script_builder.runCommand("echo $path", {"path": "example_path"}) == ([
+        "example_path",
         ""
     ], 0)
 

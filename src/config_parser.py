@@ -37,7 +37,7 @@ class MainConfig:
         if self.content[lang] == None:
             return []
 
-        return sorted(self.content[lang].keys() - {
+        result: list[str] = sorted(self.content[lang].keys() - {
             "general_setup",
             "general_shutdown",
             "file_setup",
@@ -45,7 +45,7 @@ class MainConfig:
             "function_setup",
             "function_shutdown"
         })
-
+        return [file for file in result if Path(os.path.dirname(Path(__file__).resolve().parents[0]), file).is_file()]
 
     def getFunctionsBody(self, lang: str, script_path: str) -> dict:
         if lang not in self.content.keys() or self.content[lang] == None:
@@ -199,6 +199,17 @@ class LangConfig:
         return self.content["config"]["variables"]
 
     def getHeaderData(self) -> list[str]:
+        if "unit-test" not in self.content or self.content["unit-test"] == None:
+            return []
+        if "syntax_scheme" not in self.content["unit-test"] or self.content["unit-test"]["syntax_scheme"] == None:
+            return []
+        if "header_data" not in self.content["unit-test"]["syntax_scheme"]:
+        # or self.content["unit-test"]["syntax_scheme"]["head_data"] == None:
+            return []
+        if "import" not in self.content["unit-test"]["syntax_scheme"]["header_data"]:
+        # or self.content["unit-test"]["syntax_scheme"]["head_data"]["import"] == None:
+            return []
+
         return self.content["unit-test"]["syntax_scheme"]["header_data"]["import"]
 
     def getTestSyntaxScheme(self) -> dict[str, str]:
@@ -240,6 +251,16 @@ class LangConfig:
         return Hook(type, data)
 
     def getExecutionCommand(self, path) -> str:
+        if "config" not in self.content or self.content["config"] == None:
+            return ""
+        if "script_execution" not in self.content["config"] or self.content["config"]["script_execution"] == None:
+            return ""
+        if "file_path" not in self.content["config"]["script_execution"] or self.content["config"]["script_execution"]["file_path"] == None:
+            return ""
+
         file_path: str = self.content["config"]["script_execution"]["file_path"]
+
+        if "command" not in self.content["config"]["script_execution"] or self.content["config"]["script_execution"]["command"] == None:
+            return ""
         command: str = self.content["config"]["script_execution"]["command"]
         return command.replace(file_path, path)

@@ -6,6 +6,8 @@ from src.hook import HookType
 
 
 langConfig1 = LangConfig("../tests/configs/lang1/python.yaml")
+langConfig2 = LangConfig("../tests/configs/lang2/python.yaml")
+
 def test_langConfig_config_variable_infix_char() -> None:
     """
     Test Config variable infix char getter
@@ -44,6 +46,8 @@ def test_langConfig_header_data() -> None:
         'test_module = importlib.util.module_from_spec(spec) # type: ignore',
         'spec.loader.exec_module(test_module) # type: ignore'
     ]
+    result2 = langConfig2.getHeaderData()
+    assert result2 == []
 
 def test_langConfig_syntax_scheme() -> None:
     """

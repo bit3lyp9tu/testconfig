@@ -27,11 +27,11 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-try:
-    tester = RunController(args.config, args.lang_config_dict)
-    ScriptBuilder(tester.start(args.test_path, bool(args.keep_script_files))).write(args.report)
-except Exception as e:
-    print(f"{e}")
+tester = RunController(args.config, args.lang_config_dict)
+ScriptBuilder(tester.start(args.test_path, bool(args.keep_script_files))).write(args.report)
+# try:
+# except Exception as e:
+#     print(f"{e}")
 
 # python3 test.py (./test.py oder source pip install test)
 # -> innerhalb des python codes:

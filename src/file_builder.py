@@ -36,13 +36,7 @@ class CodeBuilder:
         return result
 
     def getFunctionHead(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float]) -> str:
-        script_path = self.mainConfig.getScripts(language)
-
-        module_name = ""
-        # re.sub(r'src\.', '', script_path[0].split(".")[0].replace("/", "."))
-
         variables = self.langConfig.getVariables()
-        infix = self.langConfig.getVariableInfixChar()
 
         scheme = self.langConfig.getTestSyntaxScheme()["is_unequal_test"]
         test_header = scheme.replace(
@@ -65,7 +59,6 @@ class CodeBuilder:
         fail_msg_lines = self.langConfig.getFailMessages()
 
         variables = self.langConfig.getVariables()
-        infix = self.langConfig.getVariableInfixChar()
 
         for fail_msg in fail_msg_lines:
             test_body = fail_msg.replace(
@@ -143,9 +136,14 @@ class ScriptBuilder:
                     print(line)
                 f.writelines(line + "\n")
 
-    def runCommand(self, command: str) -> tuple[list[str], int]:
+    def runCommand(self, command: str, env_vars: dict = {}) -> tuple[list[str], int]:
+        if command == "":
+            return [], 0
+
+        os.environ.update(env_vars)
+        expanded = os.path.expandvars(command)
         try:
-            process = subprocess.run(command.split(" "), capture_output=True, text=True, check=True)
+            process = subprocess.run(expanded.split(), capture_output=True, text=True, check=True, env=env_vars)
             return process.stdout.split("\n"), process.returncode
 
         except subprocess.CalledProcessError as e:
@@ -155,11 +153,8 @@ class ScriptBuilder:
         log: list[str] = []
         return_code = 0
 
-        for attributes in hook.attributes:
-            pass
-
         for command in hook.commands:
-            output, code = self.runCommand(command)
+            output, code = self.runCommand(command, hook.attributes)
             log.extend(output)
             if code != 0:
                 return_code = code
@@ -197,7 +192,6 @@ class RunController:
         """
 
         hooks = self.mainConfig.getHooks()
-        # return Hook(hook_type, hooks[str(hook_type).lower()])
 
         if hook_type == HookType.GENERAL_SETUP or hook_type == HookType.GENERAL_SHUTDOWN:
             main_config_dict = hooks[str(hook_type).lower()].copy()

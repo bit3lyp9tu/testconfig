@@ -1,5 +1,9 @@
+import os
+
 import mypy
 import pytest
+
+from pathlib import Path
 
 from src.config_parser import MainConfig
 from src.hook import HookType
@@ -53,8 +57,7 @@ def test_mainConfig_content_scripts() -> None:
     assert set(result) == set({})
     result2 = mainConfig2.getScripts("python")
     assert set(result2) == {
-        "tests/code/test.py",
-        "tests/code/file_does_not_exists.py"
+        "tests/code/test.py"
     }
 
 def test_mainConfig_content_functions() -> None:
