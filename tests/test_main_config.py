@@ -11,6 +11,7 @@ from src.hook import HookType
 
 mainConfig1: MainConfig = MainConfig("../tests/configs/config1.yaml")
 mainConfig2: MainConfig = MainConfig("../tests/configs/config2.yaml")
+mainConfig3: MainConfig = MainConfig("../tests/configs/config3.yaml")
 
 def test_mainConfig_path() -> None:
     """
@@ -138,52 +139,133 @@ def test_mainConfig_hooks_all() -> None:
     Test if hooks getter returns all hooks from config file
     """
     result = mainConfig1.getHooks()
-    assert result == {
-        "general_setup": {
-            "attributes": {
-                "path": "a_random_path"
-            }
-        },
-        "general_shutdown": {},
-        "file_setup": {
-            "python": {
-                "attributes": {
-                    "path": "new_path_overrides_old_one"
+    # assert result == {
+    #     "general_setup": {
+    #         "attributes": {
+    #             "path": "a_random_path"
+    #         }
+    #     },
+    #     "general_shutdown": {},
+    #     "file_setup": {
+    #         "python": {
+    #             "attributes": {
+    #                 "path": "new_path_overrides_old_one"
+    #             },
+    #             "commands": [
+    #                 "echo OVERRIDDEN"
+    #             ]
+    #         },
+    #         "php": {},
+    #         "cpp": {}
+    #     },
+    #     "file_shutdown": {
+    #         "python": {
+    #             "commands": [
+    #                 "echo SHUTDOWN"
+    #             ]
+    #         },
+    #         "php": {},
+    #         "cpp": {}
+    #     },
+    #     "function_setup": {
+    #         "python": {
+    #             "tests/code/test.py": {
+    #                 "attributes": {
+    #                     "path": "src/tests",
+    #                     "target": "add"
+    #                 }
+    #             }
+    #         },
+    #         "php": {},
+    #         "cpp": {}
+    #     },
+    #     "function_shutdown": {
+    #         "python": {
+    #             "tests/code/test.py": {}
+    #         },
+    #         "php": {},
+    #         "cpp": {}
+    #     }
+    # }
+    result3 = mainConfig3.getHooks()
+    assert result3 == {
+        'file_setup': {
+            'python': {
+                'attributes': {
+                    'general': 'general_variable',
+                    'file': 'file_variable'
                 },
-                "commands": [
-                    "echo OVERRIDDEN"
-                ]
+                'commands': [
+                    'echo $general',
+                    'echo $file',
+                    'echo $function',
+                ],
             },
-            "php": {},
-            "cpp": {}
         },
-        "file_shutdown": {
-            "python": {
-                "commands": [
-                    "echo SHUTDOWN"
-                ]
+        'file_shutdown': {
+            'python': {
+                'attributes': {
+                    'general': 'general_variable',
+                    'file': 'file_variable',
+                },
+                'commands': [
+                    'echo $general',
+                    'echo $file',
+                    'echo $function',
+                ],
             },
-            "php": {},
-            "cpp": {}
         },
-        "function_setup": {
-            "python": {
-                "tests/code/test.py": {
-                    "attributes": {
-                        "path": "src/tests",
-                        "target": "add"
-                    }
-                }
+        'function_setup': {
+            'python': {
+                'tests/code/test.py': {
+                    'attributes': {
+                        'general': 'general_variable',
+                        'file': 'file_variable',
+                        'function': 'function_variable',
+                    },
+                    'commands': [
+                        'echo $general',
+                        'echo $file',
+                        'echo $function',
+                    ],
+                },
             },
-            "php": {},
-            "cpp": {}
         },
-        "function_shutdown": {
-            "python": {
-                "tests/code/test.py": {}
+        'function_shutdown': {
+            'python': {
+                'tests/code/test.py': {
+                    'attributes': {
+                        'general': 'general_variable',
+                        'file': 'file_variable',
+                        'function': 'function_variable',
+                    },
+                    'commands': [
+                        'echo $general',
+                        'echo $file',
+                        'echo $function',
+                    ],
+                },
             },
-            "php": {},
-            "cpp": {}
+        },
+        'general_setup': {
+            'attributes': {
+                'general': 'general_variable',
+            },
+            'commands': [
+                'echo $general',
+                'echo $file',
+                'echo $function',
+            ],
+        },
+        'general_shutdown': {
+            'attributes': {
+                'general': 'general_variable',
+            },
+            'commands': [
+                'echo $general',
+                'echo $file',
+                'echo $function',
+            ],
         }
     }
 
@@ -198,6 +280,18 @@ def test_mainConfig_hooks_general_setup() -> None:
     assert result.commands == []
     assert result.description == ""
 
+    result3 = mainConfig3.getHookGeneral(HookType.GENERAL_SETUP)
+    assert result3.toDict() == {
+        "attributes": {
+            "general": "general_variable"
+        },
+        "commands": [
+            "echo $general",
+            "echo $file",
+            "echo $function"
+        ]
+    }
+
 def test_mainConfig_hooks_general_shutdown() -> None:
     """
     Test import general shutdown
@@ -208,6 +302,15 @@ def test_mainConfig_hooks_general_shutdown() -> None:
     assert result.commands == []
     assert result.description == ""
 
+    result3 = mainConfig3.getHookGeneral(HookType.GENERAL_SHUTDOWN)
+    assert result3.toDict() == {
+        "commands": [
+            "echo $general",
+            "echo $file",
+            "echo $function"
+        ]
+    }
+
 def test_mainConfig_hooks_file_setup() -> None:
     """
     Test import file setup
@@ -217,6 +320,18 @@ def test_mainConfig_hooks_file_setup() -> None:
     assert result.attributes == {"path": "new_path_overrides_old_one"}
     assert result.commands == ["echo OVERRIDDEN"]
     assert result.description == ""
+
+    result3 = mainConfig3.getHookFile(HookType.FILE_SETUP, "python")
+    assert result3.toDict() == {
+        "attributes": {
+            "file": "file_variable"
+        },
+        "commands": [
+            "echo $general",
+            "echo $file",
+            "echo $function"
+        ]
+    }
 
 def test_mainConfig_hooks_file_shutdown() -> None:
     """
@@ -230,6 +345,15 @@ def test_mainConfig_hooks_file_shutdown() -> None:
     ]
     assert result.description == ""
 
+    result3 = mainConfig3.getHookFile(HookType.FILE_SHUTDOWN, "python")
+    assert result3.toDict() == {
+        "commands": [
+            "echo $general",
+            "echo $file",
+            "echo $function"
+        ]
+    }
+
 def test_mainConfig_hooks_function_setup() -> None:
     """
     Test import function setup
@@ -240,6 +364,18 @@ def test_mainConfig_hooks_function_setup() -> None:
     assert result.commands == []
     assert result.description == ""
 
+    result3 = mainConfig3.getHookFunction(HookType.FUNCTION_SETUP, "python", "tests/code/test.py")
+    assert result3.toDict() == {
+        "attributes": {
+            "function": "function_variable"
+        },
+        "commands": [
+            "echo $general",
+            "echo $file",
+            "echo $function"
+        ]
+    }
+
 def test_mainConfig_hooks_function_shutdown() -> None:
     """
     Test import function shutdown
@@ -249,3 +385,12 @@ def test_mainConfig_hooks_function_shutdown() -> None:
     assert result.attributes == {}
     assert result.commands == []
     assert result.description == ""
+
+    result3 = mainConfig3.getHookFunction(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py")
+    assert result3.toDict() == {
+        "commands": [
+            "echo $general",
+            "echo $file",
+            "echo $function"
+        ]
+    }

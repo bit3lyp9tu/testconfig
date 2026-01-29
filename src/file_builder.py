@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import os
 import re
 
@@ -125,6 +126,16 @@ class CodeBuilder:
         return result
 
 
+@contextmanager
+def temp_environ(vars: dict):
+    old = os.environ.copy()
+    os.environ.update(vars)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old)
+
 class ScriptBuilder:
     def __init__(self, lines: list[str] = []) -> None:
         self.lines = lines
@@ -140,10 +151,14 @@ class ScriptBuilder:
         if command == "":
             return [], 0
 
-        os.environ.update(env_vars)
-        expanded = os.path.expandvars(command)
+        env = os.environ.copy()
+        env.update(env_vars)
+
+        with temp_environ(env_vars):
+            expanded = os.path.expandvars(command)
+
         try:
-            process = subprocess.run(expanded.split(), capture_output=True, text=True, check=True, env=env_vars)
+            process = subprocess.run(expanded.split(), capture_output=True, text=True, check=True, env=env)
             return process.stdout.split("\n"), process.returncode
 
         except subprocess.CalledProcessError as e:
@@ -155,7 +170,7 @@ class ScriptBuilder:
 
         for command in hook.commands:
             output, code = self.runCommand(command, hook.attributes)
-            log.extend(output)
+            log.extend(output[:-1] if output[-1] == "" else output)
             if code != 0:
                 return_code = code
 

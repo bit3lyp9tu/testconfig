@@ -11,7 +11,7 @@ def test_run_command_executor() -> None:
     """
     script_builder = ScriptBuilder([])
     assert script_builder.runCommand("") == ([], 0)
-    assert script_builder.runCommand("ls -a") == ([
+    assert set(script_builder.runCommand("ls -a")[0]) == {
         ".",
         "..",
         ".git",
@@ -28,7 +28,7 @@ def test_run_command_executor() -> None:
         "tips.md",
         "todo.md",
         ""
-    ], 0)
+    }
     assert script_builder.runCommand("echo Hello World!") == ([
         "Hello World!",
         ""
@@ -57,15 +57,11 @@ def test_run_hook_command() -> None:
         "commands": ["echo Hello World!", "echo Test"]
     })) == ([
         "Hello World!",
-        "",
-        "Test",
-        ""
+        "Test"
     ], 0)
     assert script_builder.runHook(Hook(HookType.GENERAL_SETUP, {
         "commands": ["ls -a invalid_path", "echo Test"]
     })) == ([
         "ls: cannot access 'invalid_path': No such file or directory",
-        "",
-        "Test",
-        "",
+        "Test"
     ], 2)

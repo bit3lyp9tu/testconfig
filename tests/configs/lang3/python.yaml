@@ -1,0 +1,17 @@
+config:
+    script_execution:
+    variable_infix_char: "%"
+    variables:
+unit-test:
+    syntax_scheme:
+hooks:
+    general_setup:
+      attributes:
+        var: "an_important_variable"
+      commands:
+        - "echo $var"
+    general_shutdown:
+    file_setup:
+    file_shutdown:
+    function_setup:
+    function_shutdown:
