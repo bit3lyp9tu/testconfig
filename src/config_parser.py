@@ -38,7 +38,7 @@ class ConfigStructure:
     def addGeneral(self, hook_type: HookType, data: dict) -> None:
         if hook_type == HookType.GENERAL_SETUP:
             self.data["general_setup"] = deep_merge({}, data)
-            self.data["general_shutdown"]["attributes"] = deep_merge({}, data["attributes"])
+            self.data["general_shutdown"]["attributes"] = deep_merge({}, data.get("attributes", {}))
         elif hook_type == HookType.GENERAL_SHUTDOWN:
             self.data["general_shutdown"] = deep_merge(self.data["general_setup"], data)
 
@@ -46,7 +46,7 @@ class ConfigStructure:
         if hook_type == HookType.FILE_SETUP:
             self.data["file_setup"][language] = deep_merge(self.data["general_setup"], data)
             self.data["file_shutdown"][language] =  {
-                "attributes": deep_merge(self.data["file_setup"].get(language, {})["attributes"], data["attributes"])
+                "attributes": deep_merge(self.data["file_setup"].get(language, {}).get("attributes", {}), data.get("attributes", {}))
             }
         elif hook_type == HookType.FILE_SHUTDOWN:
             self.data["file_shutdown"][language] = deep_merge(self.data["file_setup"].get(language, {}), data)
@@ -55,7 +55,7 @@ class ConfigStructure:
         if hook_type == HookType.FUNCTION_SETUP:
             self.data["function_setup"][language] = {
                 script: {
-                    "attributes": deep_merge(self.data["file_setup"].get(language, {})["attributes"], data["attributes"])
+                    "attributes": deep_merge(self.data["file_setup"].get(language, {}).get("attributes", {}), data.get("attributes", {}))
                 }
             }
             self.data["function_setup"][language] = {
@@ -64,7 +64,7 @@ class ConfigStructure:
 
             self.data["function_shutdown"][language] = {
                 script: {
-                    "attributes": deep_merge(self.data["function_setup"][language].get(script, {})["attributes"], data["attributes"])
+                    "attributes": deep_merge(self.data["function_setup"][language].get(script, {}).get("attributes", {}), data.get("attributes", {}))
                 }
             }
         elif hook_type == HookType.FUNCTION_SHUTDOWN:

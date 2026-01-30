@@ -279,3 +279,17 @@ def test_run_controller_start() -> None:
         "[ERROR] Missing environment variable: [$file]",
         "[ERROR] Missing environment variable: [$function]",
     ]
+
+    test_runs2 = RunController("../tests/configs/config2.yaml", "../tests/configs/lang2")
+    assert test_runs2.start("src") == [
+        '[Hook] load general setup...',
+        'the stored path is',
+        'Language Config file found: [../tests/configs/lang2/python.yaml]',
+        '[Hook] load file setup...',
+        '[Hook] load function setup...',
+        '[File Manager] generate script file [src/demo_file.py]...',
+        '[File Manager] execute script file [src/demo_file.py]...',
+        '[Hook] load function shutdown...',
+        '[Hook] load file shutdown...',
+        '[Hook] load general shutdown...',
+    ]
