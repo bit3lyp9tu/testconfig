@@ -65,9 +65,9 @@ def test_build_all_tests_of_function() -> None:
         ""
     ]
 
-def test_build_all_tests() -> None:
+def test_build_all_tests_python() -> None:
     """
-    Test build all tests getter
+    Test build all tests getter for python
     """
     result = cb.getAllTests("python")
     assert result == [
@@ -126,4 +126,52 @@ def test_build_all_tests() -> None:
         "\tprint('[FAIL] tests/code/test.py#multiply(0.5,10,-1) != -5.0')",
         '\tsys.exit(1)',
         '',
+    ]
+
+
+cb4 = CodeBuilder("../tests/configs/config4.yaml", "../tests/configs/lang4/php.yaml")
+def test_build_all_tests_php() -> None:
+    """
+    Test build all tests getter for php
+    """
+    result = cb4.getAllTests("php")
+    assert result == [
+        '<?php',
+        "include 'tests/code/test.php';",
+        '',
+        'if (add(1,2,3) != 6) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (add(4,5,6) != 15) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (add(-1,1,1) != 1) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (add(10,-10,5) != 5) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (add(0.5,0.5,0.5) != 1.5) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (add(0.5,-0.5,0.5) != 0.5) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (subtract(10,5) != 5) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (multiply(7,8,9) != 504) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (multiply(10,11,12) != 1320) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (multiply(-1,10,1) != -10) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        'if (multiply(0.5,10,-1) != -5.0) {throw new Exception("Test Failed");}',
+        '',
+        '',
+        '',
+        '?>',
     ]

@@ -1,6 +1,8 @@
 .mypy_cache
 .pytest_cache
 
+.coverage
+
 src/__pycache__/*
 tests/__pycache__/*
 tests/code/__pycache__/*
@@ -9,8 +11,8 @@ env
 
 test_report.txt
 
-src/demo_file.py
-tests/demo_file.py
+src/demo_file.*
+tests/demo_file.*
 
 todo.md
 **/*.pyc

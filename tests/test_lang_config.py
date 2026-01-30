@@ -49,6 +49,17 @@ def test_langConfig_header_data() -> None:
     result2 = langConfig2.getHeaderData()
     assert result2 == []
 
+def test_langConfig_footer_data() -> None:
+    """
+    Test Footer Data getter
+    """
+    langConfig4 = LangConfig("../tests/configs/lang4/php.yaml")
+    result = langConfig4.getFooterData()
+    assert result == [
+        "",
+        "?>"
+    ]
+
 def test_langConfig_syntax_scheme() -> None:
     """
     Test TestSyntaxScheme getter.

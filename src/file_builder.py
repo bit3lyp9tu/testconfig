@@ -116,6 +116,8 @@ class CodeBuilder:
         for function_name in function_names:
             result.extend(self.getAllTestsOfFunction(language, function_name))
 
+        result.extend(self.langConfig.getFooterData())
+
         return result
 
     def build(self, lang: str) -> list[str]:

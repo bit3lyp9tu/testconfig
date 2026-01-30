@@ -1,0 +1,40 @@
+config:
+    script_execution:
+       file_path: "$file_path"
+       command: "php $file_path"
+    variable_infix_char: "%"
+    variables:
+        import_module: "%module%"
+        function_name: "%function_name%"
+        parameters: "%parameters%"
+        expected_result: "%expected_result%"
+        calculated_result: "%calculated_result%"
+        file_path: "%file_path%"
+unit-test:
+    syntax_scheme:
+        header_data:
+          - "<?php"
+          - "include '%file_path%';"
+        single_test_code:
+            - is_equal_test:
+                scheme: 'if (%function_name%(%parameters%) == %expected_result%) {}'
+            - is_unequal_test:
+                scheme: 'if (%function_name%(%parameters%) != %expected_result%) {throw new Exception("Test Failed");}'
+        if_success:
+            run:
+                exit_code: 0
+        if_failure:
+            run:
+                messages:
+                  - ""
+                exit_code: 1
+        footer_data:
+          - ""
+          - "?>"
+hooks:
+    general_setup:
+    general_shutdown:
+    file_setup:
+    file_shutdown:
+    function_setup:
+    function_shutdown:

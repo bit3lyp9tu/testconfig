@@ -1,0 +1,37 @@
+general_setup:
+python:
+    file_setup:
+    tests/code/test.py:
+        function_setup:
+        function_shutdown:
+        tests:
+            add:
+                - 1,2,3 -> 6
+                - 4,5,6 -> 15
+                - -1,1,1 -> 1
+                - 10,-10,5 -> 5
+                - 0.5,0.5,0.5 -> 1.5
+                - 0.5,-0.5,0.5 -> 0.5
+            subtract:
+                - 10,5 -> 5
+            multiply:
+                csv_path: 'tests/data/test.csv'
+    file_shutdown:
+php:
+    tests/code/test.php:
+        function_setup:
+        function_shutdown:
+        tests:
+            add:
+                - 1,2,3 -> 6
+                - 4,5,6 -> 15
+                - -1,1,1 -> 1
+                - 10,-10,5 -> 5
+                - 0.5,0.5,0.5 -> 1.5
+                - 0.5,-0.5,0.5 -> 0.5
+            subtract:
+                - 10,5 -> 5
+            multiply:
+                csv_path: 'tests/data/test.csv'
+cpp:
+general_shutdown:

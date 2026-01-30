@@ -251,11 +251,17 @@ class LangConfig:
         if "header_data" not in self.content["unit-test"]["syntax_scheme"]:
         # or self.content["unit-test"]["syntax_scheme"]["head_data"] == None:
             return []
-        if "import" not in self.content["unit-test"]["syntax_scheme"]["header_data"]:
-        # or self.content["unit-test"]["syntax_scheme"]["head_data"]["import"] == None:
-            return []
+        return self.content["unit-test"]["syntax_scheme"]["header_data"]
 
-        return self.content["unit-test"]["syntax_scheme"]["header_data"]["import"]
+    def getFooterData(self) -> list[str]:
+        if "unit-test" not in self.content or self.content["unit-test"] == None:
+            return []
+        if "syntax_scheme" not in self.content["unit-test"] or self.content["unit-test"]["syntax_scheme"] == None:
+            return []
+        if "footer_data" not in self.content["unit-test"]["syntax_scheme"]:
+        #  or self.content["unit-test"]["syntax_scheme"]["footer_data"]:
+            return []
+        return self.content["unit-test"]["syntax_scheme"]["footer_data"]
 
     def getTestSyntaxScheme(self) -> dict[str, str]:
         return {

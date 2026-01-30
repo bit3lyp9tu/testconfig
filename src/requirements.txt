@@ -4,3 +4,4 @@ matplotlib
 pyyaml
 types-PyYAML
 pytest
+pytest-cov
