@@ -151,6 +151,10 @@ class ScriptBuilder:
         if command == "":
             return [], 0
 
+        for match in re.findall(r'\$[^\s]*', command):
+            if match[1:] not in env_vars:
+                return [f"[ERROR] Missing environment variable: [{match}]"], 1
+
         env = os.environ.copy()
         env.update(env_vars)
 

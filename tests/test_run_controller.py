@@ -182,6 +182,48 @@ def test_run_controller_join_hook_function_shutdown() -> None:
         "description": "none"
     }
 
+test_runs3 = RunController("../tests/configs/config3.yaml", "../tests/configs/lang3")
+def test_run_controller_check_environment_scope() -> None:
+    """
+    Test if scope of environmental variables is correct
+    """
+
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.GENERAL_SETUP, "python"))
+    assert out_file == [
+        "general_variable 1",
+        "[ERROR] Missing environment variable: [$file]",
+        "[ERROR] Missing environment variable: [$function]",
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FILE_SETUP, "python"))
+    assert out_file == [
+        "general_variable 2",
+        "file_variable 2",
+        "[ERROR] Missing environment variable: [$function]",
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"))
+    assert out_file == [
+        "general_variable 3",
+        "file_variable 3",
+        "function_variable 3"
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py"))
+    assert out_file == [
+        "general_variable 3b",
+        "file_variable 3b",
+        "function_variable 3b"
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FILE_SHUTDOWN, "python"))
+    assert out_file == [
+        "general_variable 2b",
+        "file_variable 2b",
+        "[ERROR] Missing environment variable: [$function]",
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python"))
+    assert out_file == [
+        "general_variable 1b",
+        "[ERROR] Missing environment variable: [$file]",
+        "[ERROR] Missing environment variable: [$function]",
+    ]
 
 def test_run_controller_start() -> None:
     """
@@ -208,45 +250,32 @@ def test_run_controller_start() -> None:
         "'Closing down environment' in a_random_path",
     ]
 
-def test_run_controller_check_environment_scope() -> None:
-    """
-    Test if scope of environmental variables is correct
-    """
-    test_runs3 = RunController("../tests/configs/config3.yaml", "../tests/configs/lang3")
-
-    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.GENERAL_SETUP, "python"))
-    assert out_file == [
+    assert test_runs3.start("src") == [
+        "[Hook] load general setup...",
         "general_variable 1",
-        "$file 1",
-        "$function 1"
-    ]
-    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FILE_SETUP, "python"))
-    assert out_file == [
+        "[ERROR] Missing environment variable: [$file]",
+        "[ERROR] Missing environment variable: [$function]",
+        "Language Config file found: [../tests/configs/lang3/python.yaml]",
+        "[Hook] load file setup...",
         "general_variable 2",
         "file_variable 2",
-        "$function 2"
-    ]
-    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"))
-    assert out_file == [
+        "[ERROR] Missing environment variable: [$function]",
+        "[Hook] load function setup...",
         "general_variable 3",
         "file_variable 3",
-        "function_variable 3"
-    ]
-    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py"))
-    assert out_file == [
+        "function_variable 3",
+        "[File Manager] generate script file [src/demo_file.py]...",
+        "[File Manager] execute script file [src/demo_file.py]...",
+        "[Hook] load function shutdown...",
         "general_variable 3b",
         "file_variable 3b",
-        "function_variable 3b"
-    ]
-    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FILE_SHUTDOWN, "python"))
-    assert out_file == [
+        "function_variable 3b",
+        "[Hook] load file shutdown...",
         "general_variable 2b",
         "file_variable 2b",
-        "$function 2b"
-    ]
-    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python"))
-    assert out_file == [
+        "[ERROR] Missing environment variable: [$function]",
+        "[Hook] load general shutdown...",
         "general_variable 1b",
-        "$file 1b",
-        "$function 1b"
+        "[ERROR] Missing environment variable: [$file]",
+        "[ERROR] Missing environment variable: [$function]",
     ]

@@ -1,3 +1,5 @@
+import re
+
 import mypy
 import pytest
 
@@ -47,6 +49,10 @@ def test_run_command_executor_with_error() -> None:
         "ls: cannot access 'invalid_path': No such file or directory",
         ""
     ], 2)
+
+    assert script_builder.runCommand("echo $var_does_not_exist") == ([
+        f"[ERROR] Missing environment variable: [$var_does_not_exist]"
+    ], 1)
 
 def test_run_hook_command() -> None:
     """
