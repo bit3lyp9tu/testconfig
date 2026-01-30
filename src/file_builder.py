@@ -6,7 +6,7 @@ import subprocess
 
 from pathlib import Path
 
-from config_parser import MainConfig, LangConfig
+from config_parser import MainConfig, LangConfig, deep_merge
 from hook import Hook, HookType
 
 
@@ -209,42 +209,30 @@ class RunController:
         hooks = self.mainConfig.getHooks()
 
         if hook_type == HookType.GENERAL_SETUP or hook_type == HookType.GENERAL_SHUTDOWN:
-            main_config_dict = hooks[str(hook_type).lower()].copy()
+            main_config_dict = hooks[str(hook_type).lower()]
             lang_config_dict = {}
             if language != "" and language in self.mainConfig.getLanguages():
-                lang_config_dict = self.langConfigs[f"{self.lang_path}/{language}.yaml"].getHook(hook_type).toDict().copy()
-            else:
-                lang_config_dict = {"result": "unsupported feature"}
+                lang_config_dict = self.langConfigs[f"{self.lang_path}/{language}.yaml"].getHook(hook_type).toDict()
 
-            if main_config_dict == None or main_config_dict == {}:
-                return Hook(hook_type, lang_config_dict)
-            else:
-                return Hook(hook_type, main_config_dict)
+            return Hook(hook_type, deep_merge(lang_config_dict, main_config_dict))
 
         if hook_type == HookType.FILE_SETUP or hook_type == HookType.FILE_SHUTDOWN:
             if language == "" or language not in self.mainConfig.getLanguages() or hooks[str(hook_type).lower()][language] == None:
                 return Hook(hook_type, {})
 
-            main_config_dict = hooks[str(hook_type).lower()][language].copy()
-            lang_config_dict = self.langConfigs[f"{self.lang_path}/{language}.yaml"].getHook(hook_type).toDict().copy()
+            main_config_dict = hooks[str(hook_type).lower()][language]
+            lang_config_dict = self.langConfigs[f"{self.lang_path}/{language}.yaml"].getHook(hook_type).toDict()
 
-            if main_config_dict == None or main_config_dict == {}:
-                return Hook(hook_type, lang_config_dict)
-            else:
-                return Hook(hook_type, main_config_dict)
+            return Hook(hook_type, deep_merge(lang_config_dict, main_config_dict))
 
         if hook_type == HookType.FUNCTION_SETUP or hook_type == HookType.FUNCTION_SHUTDOWN:
             if language == "" or language not in self.mainConfig.getLanguages() or file == "" or file not in self.mainConfig.getScripts(language):
                 return Hook(hook_type, {})
 
-            main_config_dict = hooks[str(hook_type).lower()][language][file].copy()
-            lang_config_dict = self.langConfigs[f"{self.lang_path}/{language}.yaml"].getHook(hook_type).toDict().copy()
+            main_config_dict = hooks[str(hook_type).lower()][language][file]
+            lang_config_dict = self.langConfigs[f"{self.lang_path}/{language}.yaml"].getHook(hook_type).toDict()
 
-            if main_config_dict == None or main_config_dict == {}:
-                return Hook(hook_type, lang_config_dict)
-            else:
-                return Hook(hook_type, main_config_dict)
-
+            return Hook(hook_type, deep_merge(lang_config_dict, main_config_dict))
 
         return Hook(hook_type, {"result": "something went wrong :("})
 

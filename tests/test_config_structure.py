@@ -20,9 +20,9 @@ def test_config_structure_add_general() -> None:
             'general': 'general_variable',
         },
         'commands': [
-            'echo $general',
-            'echo $file',
-            'echo $function',
+            'echo $general 1',
+            'echo $file 1',
+            'echo $function 1',
         ],
     })
     assert cs.data == {
@@ -31,9 +31,9 @@ def test_config_structure_add_general() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1',
+                'echo $file 1',
+                'echo $function 1',
             ],
         },
         'general_shutdown': {
@@ -51,9 +51,9 @@ def test_config_structure_add_general() -> None:
             'general': 'general_variable_override',
         },
         'commands': [
-            'echo $general',
-            'echo $file',
-            'echo $function',
+            'echo $general 1b',
+            'echo $file 1b',
+            'echo $function 1b',
             'echo test'
         ],
     })
@@ -63,9 +63,9 @@ def test_config_structure_add_general() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1',
+                'echo $file 1',
+                'echo $function 1',
             ],
         },
         'general_shutdown': {
@@ -73,9 +73,9 @@ def test_config_structure_add_general() -> None:
                 'general': 'general_variable_override',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1b',
+                'echo $file 1b',
+                'echo $function 1b',
                 'echo test'
             ],
         },
@@ -91,9 +91,9 @@ def test_config_structure_add_general() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1',
+                'echo $file 1',
+                'echo $function 1',
         ],
     })
     assert cs2.data == {
@@ -102,9 +102,9 @@ def test_config_structure_add_general() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1',
+                'echo $file 1',
+                'echo $function 1',
             ],
         },
         'general_shutdown': {
@@ -124,9 +124,9 @@ def test_config_structure_add_general() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1b',
+                'echo $file 1b',
+                'echo $function 1b',
             ],
     })
     assert cs3.data == {
@@ -136,9 +136,9 @@ def test_config_structure_add_general() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1b',
+                'echo $file 1b',
+                'echo $function 1b',
             ],
         },
         'file_setup': {},
@@ -157,9 +157,9 @@ def test_config_structure_add_file() -> None:
             'file': 'file_variable'
         },
         'commands': [
-            'echo $general',
-            'echo $file',
-            'echo $function',
+            'echo $general 2',
+            'echo $file 2',
+            'echo $function 2',
         ],
     })
     assert cs.data == {
@@ -168,9 +168,9 @@ def test_config_structure_add_file() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1',
+                'echo $file 1',
+                'echo $function 1',
             ],
         },
         'general_shutdown': {
@@ -178,9 +178,9 @@ def test_config_structure_add_file() -> None:
                 'general': 'general_variable_override',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1b',
+                'echo $file 1b',
+                'echo $function 1b',
                 'echo test'
             ],
         },
@@ -191,9 +191,9 @@ def test_config_structure_add_file() -> None:
                     'file': 'file_variable'
                 },
                 'commands': [
-                    'echo $general',
-                    'echo $file',
-                    'echo $function',
+                    'echo $general 2',
+                    'echo $file 2',
+                    'echo $function 2',
                 ],
             },
         },
@@ -220,9 +220,9 @@ def test_config_structure_add_function() -> None:
             'function': 'function_variable',
         },
         'commands': [
-            'echo $general',
-            'echo $file',
-            'echo $function',
+            'echo $general 3',
+            'echo $file 3',
+            'echo $function 3',
         ],
     })
     assert cs.data == {
@@ -231,9 +231,9 @@ def test_config_structure_add_function() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1',
+                'echo $file 1',
+                'echo $function 1',
             ],
         },
         'general_shutdown': {
@@ -241,9 +241,9 @@ def test_config_structure_add_function() -> None:
                 'general': 'general_variable_override',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1b',
+                'echo $file 1b',
+                'echo $function 1b',
                 'echo test'
             ],
         },
@@ -254,9 +254,9 @@ def test_config_structure_add_function() -> None:
                     'file': 'file_variable'
                 },
                 'commands': [
-                    'echo $general',
-                    'echo $file',
-                    'echo $function',
+                    'echo $general 2',
+                    'echo $file 2',
+                    'echo $function 2',
                 ],
             },
         },
@@ -277,9 +277,9 @@ def test_config_structure_add_function() -> None:
                         'function': 'function_variable',
                     },
                     'commands': [
-                        'echo $general',
-                        'echo $file',
-                        'echo $function',
+                        'echo $general 3',
+                        'echo $file 3',
+                        'echo $function 3',
                     ],
                 },
             },
@@ -307,16 +307,16 @@ def test_config_structure_overriding() -> None:
             'general': 'general_variable',
         },
         'commands': [
-            'echo $general',
-            'echo $file',
-            'echo $function',
+            'echo $general 1',
+            'echo $file 1',
+            'echo $function 1',
         ],
     })
     cs3_2.addGeneral(HookType.GENERAL_SHUTDOWN, {
         'commands': [
-            'echo $general',
-            'echo $file',
-            'echo $function',
+            'echo $general 1b',
+            'echo $file 1b',
+            'echo $function 1b',
         ],
     })
     assert cs3_2.data == {
@@ -325,9 +325,9 @@ def test_config_structure_overriding() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1',
+                'echo $file 1',
+                'echo $function 1',
             ],
         },
         "general_shutdown": {
@@ -335,9 +335,9 @@ def test_config_structure_overriding() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1b',
+                'echo $file 1b',
+                'echo $function 1b',
             ],
         },
         "file_setup": {},

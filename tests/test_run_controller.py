@@ -1,6 +1,7 @@
 import mypy
 import pytest
 
+from src.config_parser import ConfigStructure
 from src.file_builder import RunController, ScriptBuilder
 from src.hook import HookType
 
@@ -37,20 +38,25 @@ def test_run_controller_join_hook_general_setup() -> None:
     hook_general_setup = test_runs1.getJoinedHook(HookType.GENERAL_SETUP, "python")
     assert hook_general_setup.toDict() == {
         "attributes": {
-            "path": "a_random_path"
-        }
+            "path": "a_random_path",
+            "env_name": ""
+        },
+        "commands": [
+            "echo Setting up environment"
+        ],
+        "description": "Setup the environment before running the tests"
     }
-# def test_run_controller_join_hook_general_shutdown() -> None:
-#     """
-#     Test the general shutdown hook joiner of main config and lang config
-#     """
-#     # TODO: needs to be tested without language parameter
-#     hook_general_shutdown = test_runs1.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python")
-#     assert hook_general_shutdown.toDict() == {
-#         "attributes": {"path_old": ""},
-#         "commands": ["echo 'Closing down environment' in $path"],
-#         "description": "Close down the environment after running the tests"
-#     }
+def test_run_controller_join_hook_general_shutdown() -> None:
+    """
+    Test the general shutdown hook joiner of main config and lang config
+    """
+    # TODO: needs to be tested without language parameter
+    hook_general_shutdown = test_runs1.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python")
+    assert hook_general_shutdown.toDict() == {
+        "attributes": {"path_old": "", "path": "a_random_path"},
+        "commands": ["echo 'Closing down environment' in $path"],
+        "description": "Close down the environment after running the tests"
+    }
 def test_run_controller_join_hook_file_setup() -> None:
     """
     Test the file setup hook joiner of main config and lang config
@@ -64,99 +70,183 @@ def test_run_controller_join_hook_file_setup() -> None:
             "echo OVERRIDDEN"
         ]
     }
-# def test_run_controller_join_hook_file_shutdown() -> None:
-#     """
-#     Test the file shutdown hook joiner of main config and lang config
-#     """
-#     hook_file_shutdown = test_runs1.getJoinedHook(HookType.FILE_SHUTDOWN, "python")
-#     assert hook_file_shutdown.toDict() == {
-#         "commands": [
-#             "echo SHUTDOWN"
-#         ]
-#     }
-# def test_run_controller_join_hook_function_setup() -> None:
-#     """
-#     Test the function setup hook joiner of main config and lang config
-#     """
-#     hook_function_setup = test_runs1.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py")
-#     assert hook_function_setup.toDict() == {
-#         "attributes": {
-#             "path": "src/tests",
-#             "target": "add"
-#         }
-#     }
-# def test_run_controller_join_hook_function_shutdown() -> None:
-#     """
-#     Test the function shutdown hook joiner of main config and lang config
-#     """
-#     hook_function_shutdown = test_runs1.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py")
-#     assert hook_function_shutdown.toDict() == {
-#         "description": "none"
-#     }
+def test_run_controller_join_hook_file_shutdown() -> None:
+    """
+    Test the file shutdown hook joiner of main config and lang config
+    """
+    hook_file_shutdown = test_runs1.getJoinedHook(HookType.FILE_SHUTDOWN, "python")
+    assert hook_file_shutdown.toDict() == {
+        "attributes": {
+            "path": "new_path_overrides_old_one"
+        },
+        "commands": [
+            "echo SHUTDOWN"
+        ]
+    }
+def test_run_controller_join_hook_function_setup() -> None:
+    """
+    Test the function setup hook joiner of main config and lang config
+    """
+
+    conf_struct = ConfigStructure()
+    conf_struct.addFile(
+        HookType.FILE_SETUP,
+        "python",
+        test_runs1.mainConfig.getHookFile(HookType.FILE_SETUP, "python").toDict()
+    )
+    conf_struct.addFunction(
+        HookType.FUNCTION_SETUP,
+        "python",
+        "tests/code/test.py",
+        test_runs1.mainConfig.getHookFunction(HookType.FUNCTION_SETUP, "python", "tests/code/test.py").toDict()
+    )
+    conf_struct.addFunction(
+        HookType.FUNCTION_SHUTDOWN,
+        "python",
+        "tests/code/test.py",
+        test_runs1.mainConfig.getHookFunction(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py").toDict()
+    )
+    assert conf_struct.data == {
+        'file_setup': {
+            'python': {
+                'attributes': {
+                    'path': 'new_path_overrides_old_one',
+                },
+                'commands': [
+                    'echo OVERRIDDEN',
+                ],
+            },
+        },
+        'file_shutdown': {
+            'python': {
+                'attributes': {
+                    'path': 'new_path_overrides_old_one',
+                },
+            },
+        },
+        'function_setup': {
+            'python': {
+                'tests/code/test.py': {
+                    'attributes': {
+                        'path': 'src/tests',
+                        'target': 'add',
+                    },
+                },
+            },
+        },
+        'function_shutdown': {
+            'python': {
+                'tests/code/test.py': {
+                    'attributes': {
+                        'path': 'src/tests',
+                        'target': 'add',
+                    },
+                },
+            },
+        },
+        'general_setup': {},
+        'general_shutdown': {},
+    }
+
+    result = test_runs1.mainConfig.getHooks()
+    assert result["function_setup"] == {
+        "php": {},
+        "cpp": {},
+        "python": {
+            "tests/code/test.py": {
+                "attributes": {
+                    "path": "src/tests",
+                    "target": "add"
+                }
+            }
+        }
+    }
+
+    hook_function_setup = test_runs1.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py")
+    assert hook_function_setup.toDict() == {
+        "attributes": {
+            "path": "src/tests",
+            "target": "add"
+        }
+    }
+def test_run_controller_join_hook_function_shutdown() -> None:
+    """
+    Test the function shutdown hook joiner of main config and lang config
+    """
+    hook_function_shutdown = test_runs1.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py")
+    assert hook_function_shutdown.toDict() == {
+        "attributes": {
+            "path": "src/tests",
+            "target": "add"
+        },
+        "description": "none"
+    }
 
 
-# def test_run_controller_start() -> None:
-#     """
-#     Test the start function of the run controller
-#     """
-#     assert test_runs1.start("src", keep_scripts=True) == [
-#         "[Hook] load general setup...",
-#         "Language Config file found: [../tests/configs/lang1/php.yaml]",
-#         "[Hook] load file setup...",
-#         "[Hook] load file shutdown...",
-#         "Language Config file found: [../tests/configs/lang1/python.yaml]",
-#         "[Hook] load file setup...",
-#         "OVERRIDDEN",
-#         "[Hook] load function setup...",
-#         "[File Manager] generate script file [src/demo_file.py]...",
-#         "[File Manager] execute script file [src/demo_file.py]...",
-#         "",
-#         "[Hook] load function shutdown...",
-#         "[Hook] load file shutdown...",
-#         "SHUTDOWN",
-#         "[Hook] load general shutdown...",
-#         "'Closing down environment' in $path",
-#     ]
+def test_run_controller_start() -> None:
+    """
+    Test the start function of the run controller
+    """
 
-# def test_run_controller_check_environment_scope() -> None:
-#     """
-#     Test if scope of environmental variables is correct
-#     """
-#     test_runs3 = RunController("../tests/configs/config3.yaml", "../tests/configs/lang3")
+    assert test_runs1.start("src", keep_scripts=True) == [
+        "[Hook] load general setup...",
+        "Setting up environment",
+        "Language Config file found: [../tests/configs/lang1/php.yaml]",
+        "[Hook] load file setup...",
+        "[Hook] load file shutdown...",
+        "Language Config file found: [../tests/configs/lang1/python.yaml]",
+        "[Hook] load file setup...",
+        "OVERRIDDEN",
+        "[Hook] load function setup...",
+        "[File Manager] generate script file [src/demo_file.py]...",
+        "[File Manager] execute script file [src/demo_file.py]...",
+        "",
+        "[Hook] load function shutdown...",
+        "[Hook] load file shutdown...",
+        "SHUTDOWN",
+        "[Hook] load general shutdown...",
+        "'Closing down environment' in a_random_path",
+    ]
 
-#     out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.GENERAL_SETUP, "python"))
-#     assert out_file == [
-#         "general_variable",
-#         "$file",
-#         "$function"
-#     ]
-#     out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FILE_SETUP, "python"))
-#     assert out_file == [
-#         "general_variable",
-#         "file_variable",
-#         "$function"
-#     ]
-#     out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"))
-#     assert out_file == [
-#         "general_variable",
-#         "file_variable",
-#         "function_variable"
-#     ]
-#     out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py"))
-#     assert out_file == [
-#         "general_variable",
-#         "file_variable",
-#         "function_variable"
-#     ]
-#     out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FILE_SHUTDOWN, "python"))
-#     assert out_file == [
-#         "general_variable",
-#         "file_variable",
-#         "$function"
-#     ]
-#     out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python"))
-#     assert out_file == [
-#         "general_variable",
-#         "$file",
-#         "$function"
-#     ]
+def test_run_controller_check_environment_scope() -> None:
+    """
+    Test if scope of environmental variables is correct
+    """
+    test_runs3 = RunController("../tests/configs/config3.yaml", "../tests/configs/lang3")
+
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.GENERAL_SETUP, "python"))
+    assert out_file == [
+        "general_variable 1",
+        "$file 1",
+        "$function 1"
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FILE_SETUP, "python"))
+    assert out_file == [
+        "general_variable 2",
+        "file_variable 2",
+        "$function 2"
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"))
+    assert out_file == [
+        "general_variable 3",
+        "file_variable 3",
+        "function_variable 3"
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py"))
+    assert out_file == [
+        "general_variable 3b",
+        "file_variable 3b",
+        "function_variable 3b"
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.FILE_SHUTDOWN, "python"))
+    assert out_file == [
+        "general_variable 2b",
+        "file_variable 2b",
+        "$function 2b"
+    ]
+    out_file, _ = ScriptBuilder().runHook(test_runs3.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python"))
+    assert out_file == [
+        "general_variable 1b",
+        "$file 1b",
+        "$function 1b"
+    ]

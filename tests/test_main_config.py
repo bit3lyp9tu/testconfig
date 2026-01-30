@@ -139,54 +139,66 @@ def test_mainConfig_hooks_all() -> None:
     Test if hooks getter returns all hooks from config file
     """
     result = mainConfig1.getHooks()
-    # assert result == {
-    #     "general_setup": {
-    #         "attributes": {
-    #             "path": "a_random_path"
-    #         }
-    #     },
-    #     "general_shutdown": {},
-    #     "file_setup": {
-    #         "python": {
-    #             "attributes": {
-    #                 "path": "new_path_overrides_old_one"
-    #             },
-    #             "commands": [
-    #                 "echo OVERRIDDEN"
-    #             ]
-    #         },
-    #         "php": {},
-    #         "cpp": {}
-    #     },
-    #     "file_shutdown": {
-    #         "python": {
-    #             "commands": [
-    #                 "echo SHUTDOWN"
-    #             ]
-    #         },
-    #         "php": {},
-    #         "cpp": {}
-    #     },
-    #     "function_setup": {
-    #         "python": {
-    #             "tests/code/test.py": {
-    #                 "attributes": {
-    #                     "path": "src/tests",
-    #                     "target": "add"
-    #                 }
-    #             }
-    #         },
-    #         "php": {},
-    #         "cpp": {}
-    #     },
-    #     "function_shutdown": {
-    #         "python": {
-    #             "tests/code/test.py": {}
-    #         },
-    #         "php": {},
-    #         "cpp": {}
-    #     }
-    # }
+    assert result == {
+        "general_setup": {
+            "attributes": {
+                "path": "a_random_path"
+            }
+        },
+        "general_shutdown": {
+            "attributes": {
+                "path": "a_random_path"
+            }
+        },
+        "file_setup": {
+            "python": {
+                "attributes": {
+                    "path": "new_path_overrides_old_one"
+                },
+                "commands": [
+                    "echo OVERRIDDEN"
+                ]
+            },
+            "php": {},
+            "cpp": {}
+        },
+        "file_shutdown": {
+            "python": {
+                "attributes": {
+                    "path": "new_path_overrides_old_one"
+                },
+                "commands": [
+                    "echo SHUTDOWN"
+                ]
+            },
+            "php": {},
+            "cpp": {}
+        },
+        "function_setup": {
+            "python": {
+                "tests/code/test.py": {
+                    "attributes": {
+                        "path": "src/tests",
+                        "target": "add"
+                    }
+                }
+            },
+            "php": {},
+            "cpp": {}
+        },
+        "function_shutdown": {
+            "python": {
+                "tests/code/test.py": {
+                    "attributes": {
+                        "path": "src/tests",
+                        "target": "add"
+                    }
+                }
+            },
+            "php": {},
+            "cpp": {}
+        }
+    }
     result3 = mainConfig3.getHooks()
     assert result3 == {
         'file_setup': {
@@ -196,9 +208,9 @@ def test_mainConfig_hooks_all() -> None:
                     'file': 'file_variable'
                 },
                 'commands': [
-                    'echo $general',
-                    'echo $file',
-                    'echo $function',
+                    'echo $general 2',
+                    'echo $file 2',
+                    'echo $function 2',
                 ],
             },
         },
@@ -209,9 +221,9 @@ def test_mainConfig_hooks_all() -> None:
                     'file': 'file_variable',
                 },
                 'commands': [
-                    'echo $general',
-                    'echo $file',
-                    'echo $function',
+                    'echo $general 2b',
+                    'echo $file 2b',
+                    'echo $function 2b',
                 ],
             },
         },
@@ -224,9 +236,9 @@ def test_mainConfig_hooks_all() -> None:
                         'function': 'function_variable',
                     },
                     'commands': [
-                        'echo $general',
-                        'echo $file',
-                        'echo $function',
+                        'echo $general 3',
+                        'echo $file 3',
+                        'echo $function 3',
                     ],
                 },
             },
@@ -240,9 +252,9 @@ def test_mainConfig_hooks_all() -> None:
                         'function': 'function_variable',
                     },
                     'commands': [
-                        'echo $general',
-                        'echo $file',
-                        'echo $function',
+                        'echo $general 3b',
+                        'echo $file 3b',
+                        'echo $function 3b',
                     ],
                 },
             },
@@ -252,9 +264,9 @@ def test_mainConfig_hooks_all() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1',
+                'echo $file 1',
+                'echo $function 1',
             ],
         },
         'general_shutdown': {
@@ -262,9 +274,9 @@ def test_mainConfig_hooks_all() -> None:
                 'general': 'general_variable',
             },
             'commands': [
-                'echo $general',
-                'echo $file',
-                'echo $function',
+                'echo $general 1b',
+                'echo $file 1b',
+                'echo $function 1b',
             ],
         }
     }
@@ -286,9 +298,9 @@ def test_mainConfig_hooks_general_setup() -> None:
             "general": "general_variable"
         },
         "commands": [
-            "echo $general",
-            "echo $file",
-            "echo $function"
+            "echo $general 1",
+            "echo $file 1",
+            "echo $function 1"
         ]
     }
 
@@ -305,9 +317,9 @@ def test_mainConfig_hooks_general_shutdown() -> None:
     result3 = mainConfig3.getHookGeneral(HookType.GENERAL_SHUTDOWN)
     assert result3.toDict() == {
         "commands": [
-            "echo $general",
-            "echo $file",
-            "echo $function"
+            "echo $general 1b",
+            "echo $file 1b",
+            "echo $function 1b"
         ]
     }
 
@@ -327,9 +339,9 @@ def test_mainConfig_hooks_file_setup() -> None:
             "file": "file_variable"
         },
         "commands": [
-            "echo $general",
-            "echo $file",
-            "echo $function"
+            "echo $general 2",
+            "echo $file 2",
+            "echo $function 2"
         ]
     }
 
@@ -348,9 +360,9 @@ def test_mainConfig_hooks_file_shutdown() -> None:
     result3 = mainConfig3.getHookFile(HookType.FILE_SHUTDOWN, "python")
     assert result3.toDict() == {
         "commands": [
-            "echo $general",
-            "echo $file",
-            "echo $function"
+            "echo $general 2b",
+            "echo $file 2b",
+            "echo $function 2b"
         ]
     }
 
@@ -370,9 +382,9 @@ def test_mainConfig_hooks_function_setup() -> None:
             "function": "function_variable"
         },
         "commands": [
-            "echo $general",
-            "echo $file",
-            "echo $function"
+            "echo $general 3",
+            "echo $file 3",
+            "echo $function 3"
         ]
     }
 
@@ -389,8 +401,8 @@ def test_mainConfig_hooks_function_shutdown() -> None:
     result3 = mainConfig3.getHookFunction(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py")
     assert result3.toDict() == {
         "commands": [
-            "echo $general",
-            "echo $file",
-            "echo $function"
+            "echo $general 3b",
+            "echo $file 3b",
+            "echo $function 3b"
         ]
     }

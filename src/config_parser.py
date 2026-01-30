@@ -40,7 +40,7 @@ class ConfigStructure:
             self.data["general_setup"] = deep_merge({}, data)
             self.data["general_shutdown"]["attributes"] = deep_merge({}, data["attributes"])
         elif hook_type == HookType.GENERAL_SHUTDOWN:
-            self.data["general_shutdown"] = deep_merge(self.data["general_setup"].copy(), data)
+            self.data["general_shutdown"] = deep_merge(self.data["general_setup"], data)
 
     def addFile(self, hook_type: HookType, language: str, data: dict) -> None:
         if hook_type == HookType.FILE_SETUP:
@@ -54,8 +54,14 @@ class ConfigStructure:
     def addFunction(self, hook_type: HookType, language: str, script: str, data: dict) -> None:
         if hook_type == HookType.FUNCTION_SETUP:
             self.data["function_setup"][language] = {
-                script: deep_merge(self.data["file_setup"][language], data)
+                script: {
+                    "attributes": deep_merge(self.data["file_setup"].get(language, {})["attributes"], data["attributes"])
+                }
             }
+            self.data["function_setup"][language] = {
+                script: deep_merge(self.data["function_setup"][language][script], data)
+            }
+
             self.data["function_shutdown"][language] = {
                 script: {
                     "attributes": deep_merge(self.data["function_setup"][language].get(script, {})["attributes"], data["attributes"])
@@ -180,20 +186,25 @@ class MainConfig:
     def getHooks(self) -> dict[str, dict]:
         result: ConfigStructure = ConfigStructure()
 
-        result.addGeneral(HookType.GENERAL_SETUP, self.getHookGeneral(HookType.GENERAL_SETUP).toDict().copy())
-        result.addGeneral(HookType.GENERAL_SHUTDOWN, self.getHookGeneral(HookType.GENERAL_SHUTDOWN).toDict().copy())
+        result.addGeneral(HookType.GENERAL_SETUP, self.getHookGeneral(HookType.GENERAL_SETUP).toDict())
+        result.addGeneral(HookType.GENERAL_SHUTDOWN, self.getHookGeneral(HookType.GENERAL_SHUTDOWN).toDict())
 
         for language in self.getLanguages():
             if language in self.getLanguages() and self.content[language] != None:
 
-                result.addFile(HookType.FILE_SETUP, language, self.getHookFile(HookType.FILE_SETUP, language).toDict().copy())
-                result.addFile(HookType.FILE_SHUTDOWN, language, self.getHookFile(HookType.FILE_SHUTDOWN, language).toDict().copy())
+                result.addFile(HookType.FILE_SETUP, language, self.getHookFile(HookType.FILE_SETUP, language).toDict())
+                result.addFile(HookType.FILE_SHUTDOWN, language, self.getHookFile(HookType.FILE_SHUTDOWN, language).toDict())
 
                 for script in self.getScripts(language):
-                    if self.content[language][script] != None:
+                    if script in self.content[language] and self.content[language][script] != None:
 
-                        result.addFunction(HookType.FUNCTION_SETUP, language, script, self.getHookFunction(HookType.FUNCTION_SETUP, language, script).toDict().copy())
-                        result.addFunction(HookType.FUNCTION_SHUTDOWN, language, script, self.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script).toDict().copy())
+                        result.addFunction(HookType.FUNCTION_SETUP, language, script, self.getHookFunction(HookType.FUNCTION_SETUP, language, script).toDict())
+                        result.addFunction(HookType.FUNCTION_SHUTDOWN, language, script, self.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script).toDict())
+            else:
+                result.data["file_setup"][language] = {}
+                result.data["file_shutdown"][language] = {}
+                result.data["function_setup"][language] = {}
+                result.data["function_shutdown"][language] = {}
 
         return result.data
 

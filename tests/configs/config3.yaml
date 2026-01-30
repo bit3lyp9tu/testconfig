@@ -2,38 +2,38 @@ general_setup:
     attributes:
       general: "general_variable"
     commands:
-      - "echo $general"
-      - "echo $file"
-      - "echo $function"
+      - "echo $general 1"
+      - "echo $file 1"
+      - "echo $function 1"
 python:
     file_setup:
         attributes:
           file: "file_variable"
         commands:
-          - "echo $general"
-          - "echo $file"
-          - "echo $function"
+          - "echo $general 2"
+          - "echo $file 2"
+          - "echo $function 2"
     tests/code/test.py:
         function_setup:
             attributes:
                 function: "function_variable"
             commands:
-              - "echo $general"
-              - "echo $file"
-              - "echo $function"
+              - "echo $general 3"
+              - "echo $file 3"
+              - "echo $function 3"
         function_shutdown:
             commands:
-              - "echo $general"
-              - "echo $file"
-              - "echo $function"
+              - "echo $general 3b"
+              - "echo $file 3b"
+              - "echo $function 3b"
         tests:
     file_shutdown:
         commands:
-          - "echo $general"
-          - "echo $file"
-          - "echo $function"
+          - "echo $general 2b"
+          - "echo $file 2b"
+          - "echo $function 2b"
 general_shutdown:
     commands:
-      - "echo $general"
-      - "echo $file"
-      - "echo $function"
+      - "echo $general 1b"
+      - "echo $file 1b"
+      - "echo $function 1b"
