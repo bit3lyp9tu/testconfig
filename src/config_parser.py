@@ -249,7 +249,6 @@ class LangConfig:
         if "syntax_scheme" not in self.content["unit-test"] or self.content["unit-test"]["syntax_scheme"] == None:
             return []
         if "header_data" not in self.content["unit-test"]["syntax_scheme"]:
-        # or self.content["unit-test"]["syntax_scheme"]["head_data"] == None:
             return []
         return self.content["unit-test"]["syntax_scheme"]["header_data"]
 
@@ -259,7 +258,6 @@ class LangConfig:
         if "syntax_scheme" not in self.content["unit-test"] or self.content["unit-test"]["syntax_scheme"] == None:
             return []
         if "footer_data" not in self.content["unit-test"]["syntax_scheme"]:
-        #  or self.content["unit-test"]["syntax_scheme"]["footer_data"]:
             return []
         return self.content["unit-test"]["syntax_scheme"]["footer_data"]
 

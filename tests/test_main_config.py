@@ -73,6 +73,9 @@ def test_mainConfig_content_functions() -> None:
     result2 = list(mainConfig2.getFunctionsBody("python", "tests/code/file_does_not_exists.py").keys())
     assert result2 ==  []
 
+    result = list(mainConfig1.getFunctionsBody("java", "tests/code/test.jar").keys())
+    assert result ==  []
+
 def test_mainConfig_content_functions_content_data() -> None:
     """
     Test the content attribute test data.

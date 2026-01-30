@@ -312,7 +312,4 @@ class RunController:
 
         return output
 
-    def validatePaths(self) -> None:
-        pass
-
 

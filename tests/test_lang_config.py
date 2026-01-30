@@ -49,6 +49,13 @@ def test_langConfig_header_data() -> None:
     result2 = langConfig2.getHeaderData()
     assert result2 == []
 
+    result = LangConfig("../tests/configs/lang1/php.yaml").getHeaderData()
+    assert result == []
+
+    # result = LangConfig("../tests/configs/lang2/python.yaml").getHeaderData()
+    # assert result == []
+
+
 def test_langConfig_footer_data() -> None:
     """
     Test Footer Data getter
@@ -59,6 +66,9 @@ def test_langConfig_footer_data() -> None:
         "",
         "?>"
     ]
+
+    result = LangConfig("../tests/configs/lang1/php.yaml").getFooterData()
+    assert result == []
 
 def test_langConfig_syntax_scheme() -> None:
     """
@@ -113,3 +123,6 @@ def test_langConfig_config_execution_command() -> None:
     """
     result = langConfig1.getExecutionCommand("demo_file.py")
     assert result == "env/bin/python3 demo_file.py"
+
+    result = LangConfig("../tests/configs/lang1/php.yaml").getExecutionCommand("")
+    assert result == ""

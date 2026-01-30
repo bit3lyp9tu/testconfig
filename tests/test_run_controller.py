@@ -30,6 +30,13 @@ def test_run_controller_run_hook() -> None:
         "OVERRIDDEN"
     ]
     assert err_code == 0
+
+def test_run_controller_join_hook() -> None:
+    """
+    Test the joiner of main config and lang config
+    """
+    joined_hook  = test_runs1.getJoinedHook(HookType.NONE, "")
+    assert joined_hook.toDict() == {}
 def test_run_controller_join_hook_general_setup() -> None:
     """
     Test the general setup hook joiner of main config and lang config
@@ -70,6 +77,10 @@ def test_run_controller_join_hook_file_setup() -> None:
             "echo OVERRIDDEN"
         ]
     }
+    hook_file_setup = test_runs1.getJoinedHook(HookType.FILE_SETUP, "")
+    assert hook_file_setup.toDict() == {}
+
+
 def test_run_controller_join_hook_file_shutdown() -> None:
     """
     Test the file shutdown hook joiner of main config and lang config
@@ -169,6 +180,9 @@ def test_run_controller_join_hook_function_setup() -> None:
             "target": "add"
         }
     }
+    hook_function_setup = test_runs1.getJoinedHook(HookType.FUNCTION_SETUP, "")
+    assert hook_function_setup.toDict() == {}
+
 def test_run_controller_join_hook_function_shutdown() -> None:
     """
     Test the function shutdown hook joiner of main config and lang config

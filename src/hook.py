@@ -44,9 +44,9 @@ class Hook:
         description: str = ""
 
         if data != {}:
-            if "attributes" in data.keys():
+            if "attributes" in data:
                 if type(data["attributes"]) == list:
-                    attributes = {i: "" for i in list(dict(data["commands"]).keys())}
+                    attributes = {i: "" for i in list(dict(data["attributes"]).keys())}
                 else:
                     attributes = dict(data["attributes"])
             commands = list(data["commands"] if "commands" in data.keys() else [])
@@ -73,9 +73,13 @@ class Hook:
             result["description"] = self.description
         return result
 
-    def __eq__(self, hook_type) -> bool:
-        return self.type == hook_type.type and self.attributes == hook_type.attributes and self.commands == hook_type.commands and self.description == hook_type.description
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Hook):
+            return NotImplemented
 
-    # def overrideWith(self, hook: 'Hook') -> 'Hook':
-    #     if self.type == hook.type:
-    #         return
+        return (
+            self.type == other.type
+            and self.attributes == other.attributes
+            and self.commands == other.commands
+            and self.description == other.description
+        )
