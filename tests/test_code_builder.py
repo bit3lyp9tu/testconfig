@@ -1,10 +1,11 @@
 import mypy
 import pytest
 
-from src.file_builder import CodeBuilder
+from src.config_parser import MainConfig, LangConfig
+from src.file_builder import Script
 
 
-cb = CodeBuilder("../tests/configs/config1.yaml", "../tests/configs/lang1/python.yaml")
+cb = Script(MainConfig("../tests/configs/config1.yaml"), LangConfig( "../tests/configs/lang1/python.yaml"))
 
 def test_build_import() -> None:
     """
@@ -129,7 +130,7 @@ def test_build_all_tests_python() -> None:
     ]
 
 
-cb4 = CodeBuilder("../tests/configs/config4.yaml", "../tests/configs/lang4/php.yaml")
+cb4 = Script(MainConfig("../tests/configs/config4.yaml"), LangConfig( "../tests/configs/lang4/php.yaml"))
 def test_build_all_tests_php() -> None:
     """
     Test build all tests getter for php

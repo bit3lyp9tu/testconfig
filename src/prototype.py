@@ -3,7 +3,7 @@ import argparse
 
 from pathlib import Path
 
-from file_builder import ScriptBuilder, RunController
+from file_builder import Writer, RunController
 
 
 parser = argparse.ArgumentParser(description='Run pre configured test suites.')
@@ -28,7 +28,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 tester = RunController(args.config, args.lang_config_dict)
-ScriptBuilder(tester.start(args.test_path, bool(args.keep_script_files))).write(args.report)
+Writer(tester.start(args.test_path, bool(args.keep_script_files))).write(args.report)
 # try:
 # except Exception as e:
 #     print(f"{e}")

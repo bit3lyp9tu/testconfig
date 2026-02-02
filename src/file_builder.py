@@ -1,19 +1,33 @@
-from contextlib import contextmanager
 import os
 import re
+
+import time
 
 import subprocess
 
 from pathlib import Path
+from contextlib import contextmanager
+
+from rich.progress import Progress
+from rich.traceback import install
 
 from config_parser import MainConfig, LangConfig, deep_merge
 from hook import Hook, HookType
 
 
-class CodeBuilder:
-    def __init__(self, config: str, lang_config: str) -> None:
-        self.mainConfig: MainConfig = MainConfig(config)
-        self.langConfig: LangConfig = LangConfig(lang_config)
+class LogLevel:
+    def __init__(self, level: int = 0, prefix: str = "[]", color: str = "") -> None:
+        self.level: int = level
+        self.prefix: str = prefix
+        self.color: str = color
+
+    def print(self, text: str = ""):
+        print(f"{self.prefix} {text}")
+
+class Script:
+    def __init__(self, config: MainConfig, lang_config: LangConfig) -> None:
+        self.mainConfig: MainConfig = config
+        self.langConfig: LangConfig = lang_config
 
     def getImports(self, language: str) -> list[str]:
         result: list[str] = []
@@ -138,7 +152,7 @@ def temp_environ(vars: dict):
         os.environ.clear()
         os.environ.update(old)
 
-class ScriptBuilder:
+class Writer:
     def __init__(self, lines: list[str] = []) -> None:
         self.lines = lines
 
@@ -149,7 +163,8 @@ class ScriptBuilder:
                     print(line)
                 f.writelines(line + "\n")
 
-    def runCommand(self, command: str, env_vars: dict = {}) -> tuple[list[str], int]:
+    @classmethod
+    def runCommand(cls, command: str, env_vars: dict = {}) -> tuple[list[str], int]:
         if command == "":
             return [], 0
 
@@ -170,12 +185,13 @@ class ScriptBuilder:
         except subprocess.CalledProcessError as e:
             return e.stderr.split("\n"), e.returncode
 
-    def runHook(self, hook: Hook) -> tuple[list[str], int]:
+    @classmethod
+    def runHook(cls, hook: Hook) -> tuple[list[str], int]:
         log: list[str] = []
         return_code = 0
 
         for command in hook.commands:
-            output, code = self.runCommand(command, hook.attributes)
+            output, code = cls.runCommand(command, hook.attributes)
             log.extend(output[:-1] if output[-1] == "" else output)
             if code != 0:
                 return_code = code
@@ -250,9 +266,8 @@ class RunController:
 
         # general hook setup
         output.append("[Hook] load general setup...")
-        out, err_code = ScriptBuilder().runHook(self.getJoinedHook(HookType.GENERAL_SETUP, used_general_config_language))
+        out, err_code = Writer.runHook(self.getJoinedHook(HookType.GENERAL_SETUP, used_general_config_language))
         output.extend(out)
-        #   initialize local attributes
 
         # languages
         for path in self.langConfigs.keys():
@@ -260,30 +275,26 @@ class RunController:
             output.append(f"Language Config file found: [{path}]")
         #   file setup hook
             output.append("[Hook] load file setup...")
-            out_lang, err_code = ScriptBuilder().runHook(self.getJoinedHook(HookType.FILE_SETUP, language_name))
+            out_lang, err_code = Writer.runHook(self.getJoinedHook(HookType.FILE_SETUP, language_name))
             output.extend(out_lang)
-
-            #   initialize local attributes
 
             #   files
             for file in self.mainConfig.getScripts(language_name):
                 #   function setup hook
                 output.append("[Hook] load function setup...")
-                out_file, err_code = ScriptBuilder().runHook(self.getJoinedHook(HookType.FUNCTION_SETUP, language_name, file))
+                out_file, err_code = Writer.runHook(self.getJoinedHook(HookType.FUNCTION_SETUP, language_name, file))
                 output.extend(out_file)
-
-                #   initialize local attributes
 
                 #   write script file
                 generated_file_name = f"{directory}/demo_file.{file.split(".")[-1]}"
-                code_lines = CodeBuilder(self.mainConfig.path, path)
+                code_lines = Script(self.mainConfig, self.langConfigs[f"{self.lang_path}/{language_name}.yaml"])
 
                 output.append(f"[File Manager] generate script file [{generated_file_name}]...")
-                ScriptBuilder(code_lines.getAllTests(language_name)).write(generated_file_name, False)
+                Writer(code_lines.getAllTests(language_name)).write(generated_file_name, False)
 
                 #   execute script file
                 output.append(f"[File Manager] execute script file [{generated_file_name}]...")
-                script_result, exit_code = ScriptBuilder([]).runCommand(self.langConfigs[path].getExecutionCommand(generated_file_name))
+                script_result, exit_code = Writer.runCommand(self.langConfigs[path].getExecutionCommand(generated_file_name))
                 output.extend(script_result)
                 if exit_code != 0:
                     output.append(f"[Test] Test in {generated_file_name} failed!")
@@ -291,23 +302,23 @@ class RunController:
 
                 #   delete script file
                 # if keep_scripts == False:
-                #     script_result, exit_code = ScriptBuilder([]).runCommand(f"rm {generated_file_name}")
+                #     script_result, exit_code = Writer.runCommand(f"rm {generated_file_name}")
                 #     if script_result[-1] != "":
                 #         output.extend(script_result)
 
                 #   function shutdown hook
                 output.append("[Hook] load function shutdown...")
-                out_file, err_code = ScriptBuilder().runHook(self.getJoinedHook(HookType.FUNCTION_SHUTDOWN, language_name, file))
+                out_file, err_code = Writer.runHook(self.getJoinedHook(HookType.FUNCTION_SHUTDOWN, language_name, file))
                 output.extend(out_file)
 
             #   file shutdown hook
             output.append("[Hook] load file shutdown...")
-            out_lang, err_code = ScriptBuilder().runHook(self.getJoinedHook(HookType.FILE_SHUTDOWN, language_name))
+            out_lang, err_code = Writer.runHook(self.getJoinedHook(HookType.FILE_SHUTDOWN, language_name))
             output.extend(out_lang)
 
         # general hook shutdown
         output.append("[Hook] load general shutdown...")
-        out, err_code = ScriptBuilder().runHook(self.getJoinedHook(HookType.GENERAL_SHUTDOWN, used_general_config_language))
+        out, err_code = Writer.runHook(self.getJoinedHook(HookType.GENERAL_SHUTDOWN, used_general_config_language))
         output.extend(out)
 
         return output
