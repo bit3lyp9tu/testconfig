@@ -36,23 +36,23 @@ class ConfigStructure:
         }
 
     def addGeneral(self, hook_type: HookType, data: dict) -> None:
-        if hook_type == HookType.GENERAL_SETUP:
+        if hook_type.value == HookType.GENERAL_SETUP.value:
             self.data["general_setup"] = deep_merge({}, data)
             self.data["general_shutdown"]["attributes"] = deep_merge({}, data.get("attributes", {}))
-        elif hook_type == HookType.GENERAL_SHUTDOWN:
+        elif hook_type.value == HookType.GENERAL_SHUTDOWN.value:
             self.data["general_shutdown"] = deep_merge(self.data["general_setup"], data)
 
     def addFile(self, hook_type: HookType, language: str, data: dict) -> None:
-        if hook_type == HookType.FILE_SETUP:
+        if hook_type.value == HookType.FILE_SETUP.value:
             self.data["file_setup"][language] = deep_merge(self.data["general_setup"], data)
             self.data["file_shutdown"][language] =  {
                 "attributes": deep_merge(self.data["file_setup"].get(language, {}).get("attributes", {}), data.get("attributes", {}))
             }
-        elif hook_type == HookType.FILE_SHUTDOWN:
+        elif hook_type.value == HookType.FILE_SHUTDOWN.value:
             self.data["file_shutdown"][language] = deep_merge(self.data["file_setup"].get(language, {}), data)
 
     def addFunction(self, hook_type: HookType, language: str, script: str, data: dict) -> None:
-        if hook_type == HookType.FUNCTION_SETUP:
+        if hook_type.value == HookType.FUNCTION_SETUP.value:
             self.data["function_setup"][language] = {
                 script: {
                     "attributes": deep_merge(self.data["file_setup"].get(language, {}).get("attributes", {}), data.get("attributes", {}))
@@ -67,7 +67,7 @@ class ConfigStructure:
                     "attributes": deep_merge(self.data["function_setup"][language].get(script, {}).get("attributes", {}), data.get("attributes", {}))
                 }
             }
-        elif hook_type == HookType.FUNCTION_SHUTDOWN:
+        elif hook_type.value == HookType.FUNCTION_SHUTDOWN.value:
             self.data["function_shutdown"][language][script] = deep_merge(self.data["function_setup"][language].get(script, {}), data)
 
 

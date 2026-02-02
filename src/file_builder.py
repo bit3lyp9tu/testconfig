@@ -214,7 +214,7 @@ class RunController:
 
         hooks = self.mainConfig.getHooks()
 
-        if hook_type == HookType.GENERAL_SETUP or hook_type == HookType.GENERAL_SHUTDOWN:
+        if hook_type.value == HookType.GENERAL_SETUP.value or hook_type.value == HookType.GENERAL_SHUTDOWN.value:
             main_config_dict = hooks[str(hook_type).lower()]
             lang_config_dict = {}
             if language != "" and language in self.mainConfig.getLanguages():
@@ -222,7 +222,7 @@ class RunController:
 
             return Hook(hook_type, deep_merge(lang_config_dict, main_config_dict))
 
-        if hook_type == HookType.FILE_SETUP or hook_type == HookType.FILE_SHUTDOWN:
+        if hook_type.value == HookType.FILE_SETUP.value or hook_type.value == HookType.FILE_SHUTDOWN.value:
             if language == "" or language not in self.mainConfig.getLanguages() or hooks[str(hook_type).lower()][language] == None:
                 return Hook(hook_type, {})
 
@@ -231,7 +231,7 @@ class RunController:
 
             return Hook(hook_type, deep_merge(lang_config_dict, main_config_dict))
 
-        if hook_type == HookType.FUNCTION_SETUP or hook_type == HookType.FUNCTION_SHUTDOWN:
+        if hook_type.value == HookType.FUNCTION_SETUP.value or hook_type.value == HookType.FUNCTION_SHUTDOWN.value:
             if language == "" or language not in self.mainConfig.getLanguages() or file == "" or file not in self.mainConfig.getScripts(language):
                 return Hook(hook_type, {})
 

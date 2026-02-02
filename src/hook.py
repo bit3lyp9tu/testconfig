@@ -12,28 +12,13 @@ class HookType(Enum):
     FUNCTION_SETUP = 5
     FUNCTION_SHUTDOWN = 6
 
-    def getType(self, id: int) -> Enum:
-        match id:
-            case 1:
-                return HookType.GENERAL_SETUP
-            case 2:
-                return HookType.GENERAL_SHUTDOWN
-            case 3:
-                return HookType.FILE_SETUP
-            case 4:
-                return HookType.FILE_SHUTDOWN
-            case 5:
-                return HookType.FUNCTION_SETUP
-            case 6:
-                return HookType.FUNCTION_SHUTDOWN
-            case _:
-                return HookType.NONE
+    @classmethod
+    def getType(cls, id: int) -> 'HookType':
+        return HookType(cls._value2member_map_.get(id,(cls.NONE)))
 
     def __str__(self) -> str:
         return str(self.name)
 
-    def __eq__(self, hook_type) -> bool:
-        return self.value == hook_type.value
 
 class Hook:
     def __init__(self, hook_type: HookType, data: dict) -> None:

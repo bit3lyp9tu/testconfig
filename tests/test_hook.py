@@ -4,6 +4,12 @@ import pytest
 from src.hook import Hook, HookType
 
 
+def test_hook_type_getter() -> None:
+    """
+    Test type getter method of hook type
+    """
+    assert HookType.getType(1).value == HookType.GENERAL_SETUP.value
+
 def test_hook_eq() -> None:
     """
     Test equal magic method of hook
