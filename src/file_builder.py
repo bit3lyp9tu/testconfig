@@ -295,7 +295,6 @@ class RunController:
 
         used_general_config_language = "python" # TODO: implement logic to determine which language to use
 
-        # general hook setup
         output.extend(self._hook_block(self.getJoinedHook(HookType.GENERAL_SETUP, used_general_config_language), "/", output))
 
         # languages
@@ -304,12 +303,11 @@ class RunController:
             msg = f"Language Config file found: [{path}]"
             output.append(msg)
             self.LOGS.print(1, msg)
-        #   file setup hook
+
             output.extend(self._hook_block(self.getJoinedHook(HookType.FILE_SETUP, language_name), f"/{language_name}/", output))
 
             #   files
             for file in self.mainConfig.getScripts(language_name):
-                #   function setup hook
                 output.extend(self._hook_block(self.getJoinedHook(HookType.FUNCTION_SETUP, language_name, file), f"/{language_name}/({file})/", output))
 
                 #   write script file
@@ -338,13 +336,10 @@ class RunController:
                 #     if script_result[-1] != "":
                 #         output.extend(script_result)
 
-                #   function shutdown hook
                 output.extend(self._hook_block(self.getJoinedHook(HookType.FUNCTION_SHUTDOWN, language_name, file), f"/{language_name}/({file})/", output))
 
-            #   file shutdown hook
             output.extend(self._hook_block(self.getJoinedHook(HookType.FILE_SHUTDOWN, language_name), f"/{language_name}/", output))
 
-        # general hook shutdown
         output.extend(self._hook_block(self.getJoinedHook(HookType.GENERAL_SHUTDOWN, used_general_config_language), f"/", output))
 
         return output
