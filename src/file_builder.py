@@ -8,12 +8,12 @@ import subprocess
 from pathlib import Path
 from contextlib import contextmanager
 
+from rich import print
 from rich.progress import Progress
 from rich.traceback import install
 
 from config_parser import MainConfig, LangConfig, deep_merge
 from hook import Hook, HookType
-
 
 class LogLevel:
     def __init__(self, level: int = 0, prefix: str = "[]", color: str = "") -> None:
@@ -21,8 +21,18 @@ class LogLevel:
         self.prefix: str = prefix
         self.color: str = color
 
-    def print(self, text: str = ""):
-        print(f"{self.prefix} {text}")
+class LogLevels:
+    # TODO needs better name
+
+    def __init__(self, *args) -> None:
+        self.log_lvl_s: list[LogLevel] = list(args)
+
+    def print(self, priority: int = 0, text: str = ""):
+        for i in self.log_lvl_s:
+            if priority == i.level:
+                print(f"[bold {i.color}]{i.prefix}[/bold {i.color}] {text}")
+                break
+
 
 class Script:
     def __init__(self, config: MainConfig, lang_config: LangConfig) -> None:
@@ -200,6 +210,13 @@ class Writer:
 
 
 class RunController:
+
+    LOGS = LogLevels(
+        LogLevel(1, "[INFO]", "dodger_blue2"),
+        LogLevel(2, "[WARN]", "yellow1"),
+        LogLevel(3, "[ERROR]", "bright_red")
+    )
+
     def __init__(self, config_path: str, lang_path: str) -> None:
         self.mainConfig = MainConfig(config_path)
 
@@ -266,6 +283,7 @@ class RunController:
 
         # general hook setup
         output.append("[Hook] load general setup...")
+        self.LOGS.print(1, "[Hook] load general setup...")
         out, err_code = Writer.runHook(self.getJoinedHook(HookType.GENERAL_SETUP, used_general_config_language))
         output.extend(out)
 

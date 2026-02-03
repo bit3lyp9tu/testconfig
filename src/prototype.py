@@ -3,8 +3,9 @@ import argparse
 
 from pathlib import Path
 
-from file_builder import Writer, RunController
+from file_builder import Writer, RunController, LogLevel
 
+LOG4 = LogLevel(4, "[FATAL]", "dark_orange3")
 
 parser = argparse.ArgumentParser(description='Run pre configured test suites.')
 
