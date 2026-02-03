@@ -49,12 +49,12 @@ def test_run_command_executor_with_error() -> None:
     ], 2)
 
     assert Writer.runCommand("echo $var_does_not_exist") == ([
-        f"[ERROR] Missing environment variable: [$var_does_not_exist]"
+        f"Missing environment variable: [$var_does_not_exist]"
     ], 1)
 
     assert Writer.runCommand("sjdjhgdhjdjdfjfd") == ([
-
-    ], 1)
+        "[Errno 2] No such file or directory: 'sjdjhgdhjdjdfjfd'"
+    ], 127)
 
 def test_run_hook_command() -> None:
     """

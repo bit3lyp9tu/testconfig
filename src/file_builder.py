@@ -194,6 +194,8 @@ class Writer:
 
         except subprocess.CalledProcessError as e:
             return e.stderr.split("\n"), e.returncode
+        except FileNotFoundError as e:
+            return [str(e)], 127
 
     @classmethod
     def runHook(cls, hook: Hook) -> tuple[list[str], int]:
