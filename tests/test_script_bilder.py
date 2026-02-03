@@ -52,6 +52,10 @@ def test_run_command_executor_with_error() -> None:
         f"[ERROR] Missing environment variable: [$var_does_not_exist]"
     ], 1)
 
+    assert Writer.runCommand("sjdjhgdhjdjdfjfd") == ([
+
+    ], 1)
+
 def test_run_hook_command() -> None:
     """
     Test run hook

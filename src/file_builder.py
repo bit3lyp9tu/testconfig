@@ -30,7 +30,7 @@ class LogLevels:
     def print(self, priority: int = 0, text: str = ""):
         for i in self.log_lvl_s:
             if priority == i.level:
-                print(f"[bold {i.color}]{i.prefix}[/bold {i.color}] {text}")
+                print(f"[bold {i.color}]{i.prefix}[/bold {i.color}]\t{text}")
                 break
 
 
@@ -180,7 +180,7 @@ class Writer:
 
         for match in re.findall(r'\$[^\s]*', command):
             if match[1:] not in env_vars:
-                return [f"[ERROR] Missing environment variable: [{match}]"], 1
+                return [f"Missing environment variable: [{match}]"], 1
 
         env = os.environ.copy()
         env.update(env_vars)
@@ -229,6 +229,7 @@ class RunController:
             if Path(os.path.join(os.path.dirname(__file__), path)).is_file():
                 self.langConfigs[path] = LangConfig(path)
 
+
     def getJoinedHook(self, hook_type: HookType = HookType.NONE, language: str = "", file: str = "") -> Hook:
         """
         Compares hooks defined in config.yaml and language.yaml files.
@@ -276,47 +277,60 @@ class RunController:
         return Hook(hook_type, {"result": "something went wrong :("})
 
 
+    def _hook_block(self, hook: Hook, path: str, output_stream: list[str]) -> list[str]:
+        hook_name = str(hook.type).lower().replace("_", " ")
+        msg = f"[Hook] [dark_magenta]{path}:[/dark_magenta] load {hook_name}..."
+        output_stream.append(msg)
+        self.LOGS.print(1, msg)
+        out_lang, err_code = Writer.runHook(hook)
+        if err_code != 0:
+            self.LOGS.print(3, f"[dark_magenta]{path}.{hook_name.replace(" ", "_")}:[/dark_magenta] [bright_red]" + "".join(out_lang) + "[/bright_red]")
+        output_stream.extend(out_lang)
+
+        return output_stream
+
+
     def start(self, directory: str, keep_scripts: bool = True) -> list[str]:
         output: list[str] = []
 
         used_general_config_language = "python" # TODO: implement logic to determine which language to use
 
         # general hook setup
-        output.append("[Hook] load general setup...")
-        self.LOGS.print(1, "[Hook] load general setup...")
-        out, err_code = Writer.runHook(self.getJoinedHook(HookType.GENERAL_SETUP, used_general_config_language))
-        output.extend(out)
+        output.extend(self._hook_block(self.getJoinedHook(HookType.GENERAL_SETUP, used_general_config_language), "/", output))
 
         # languages
         for path in self.langConfigs.keys():
             language_name = path.split("/")[-1].split(".yaml")[0]
-            output.append(f"Language Config file found: [{path}]")
+            msg = f"Language Config file found: [{path}]"
+            output.append(msg)
+            self.LOGS.print(1, msg)
         #   file setup hook
-            output.append("[Hook] load file setup...")
-            out_lang, err_code = Writer.runHook(self.getJoinedHook(HookType.FILE_SETUP, language_name))
-            output.extend(out_lang)
+            output.extend(self._hook_block(self.getJoinedHook(HookType.FILE_SETUP, language_name), f"/{language_name}/", output))
 
             #   files
             for file in self.mainConfig.getScripts(language_name):
                 #   function setup hook
-                output.append("[Hook] load function setup...")
-                out_file, err_code = Writer.runHook(self.getJoinedHook(HookType.FUNCTION_SETUP, language_name, file))
-                output.extend(out_file)
+                output.extend(self._hook_block(self.getJoinedHook(HookType.FUNCTION_SETUP, language_name, file), f"/{language_name}/({file})/", output))
 
                 #   write script file
                 generated_file_name = f"{directory}/demo_file.{file.split(".")[-1]}"
                 code_lines = Script(self.mainConfig, self.langConfigs[f"{self.lang_path}/{language_name}.yaml"])
 
-                output.append(f"[File Manager] generate script file [{generated_file_name}]...")
+                msg = f"[File Manager] generate script file [{generated_file_name}]..."
+                output.append(msg)
+                self.LOGS.print(1, msg)
                 Writer(code_lines.getAllTests(language_name)).write(generated_file_name, False)
 
                 #   execute script file
-                output.append(f"[File Manager] execute script file [{generated_file_name}]...")
+                msg = f"[File Manager] execute script file [{generated_file_name}]..."
+                output.append(msg)
+                self.LOGS.print(1, msg)
                 script_result, exit_code = Writer.runCommand(self.langConfigs[path].getExecutionCommand(generated_file_name))
                 output.extend(script_result)
                 if exit_code != 0:
-                    output.append(f"[Test] Test in {generated_file_name} failed!")
-                    output.append(f"[Test] exit code: {exit_code}")
+                    msg = f"[yellow1][Test] Test in [./{generated_file_name}] failed! (Exit code: {exit_code}) [/yellow1]"
+                    output.append(msg)
+                    self.LOGS.print(2, msg)
 
                 #   delete script file
                 # if keep_scripts == False:
@@ -325,20 +339,12 @@ class RunController:
                 #         output.extend(script_result)
 
                 #   function shutdown hook
-                output.append("[Hook] load function shutdown...")
-                out_file, err_code = Writer.runHook(self.getJoinedHook(HookType.FUNCTION_SHUTDOWN, language_name, file))
-                output.extend(out_file)
+                output.extend(self._hook_block(self.getJoinedHook(HookType.FUNCTION_SHUTDOWN, language_name, file), f"/{language_name}/({file})/", output))
 
             #   file shutdown hook
-            output.append("[Hook] load file shutdown...")
-            out_lang, err_code = Writer.runHook(self.getJoinedHook(HookType.FILE_SHUTDOWN, language_name))
-            output.extend(out_lang)
+            output.extend(self._hook_block(self.getJoinedHook(HookType.FILE_SHUTDOWN, language_name), f"/{language_name}/", output))
 
         # general hook shutdown
-        output.append("[Hook] load general shutdown...")
-        out, err_code = Writer.runHook(self.getJoinedHook(HookType.GENERAL_SHUTDOWN, used_general_config_language))
-        output.extend(out)
+        output.extend(self._hook_block(self.getJoinedHook(HookType.GENERAL_SHUTDOWN, used_general_config_language), f"/", output))
 
         return output
-
-

@@ -29,7 +29,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 tester = RunController(args.config, args.lang_config_dict)
-Writer(tester.start(args.test_path, bool(args.keep_script_files))).write(args.report)
+Writer(tester.start(args.test_path, bool(args.keep_script_files))).write(args.report, False)
 # try:
 # except Exception as e:
 #     print(f"{e}")
