@@ -67,7 +67,27 @@ class Layer:
     def __init__(self) -> None:
         self.data: dict = {}
 
+    def finalize(self) -> None:
+        if "general_setup" not in self.data:
+            self.data["general_setup"] = {}
+
+        if "general_shutdown" not in self.data:
+            self.data["general_shutdown"] = {}
+
+        if "file_setup" not in self.data:
+            self.data["file_setup"] = {}
+
+        if "file_shutdown" not in self.data:
+            self.data["file_shutdown"] = {}
+
+        if "function_setup" not in self.data:
+            self.data["function_setup"] = {}
+
+        if "function_shutdown" not in self.data:
+            self.data["function_shutdown"] = {}
+
     def toData(self) -> dict:
+        self.finalize()
         return self.data
 
 class GeneralLayer(Layer):

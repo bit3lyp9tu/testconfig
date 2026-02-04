@@ -313,6 +313,17 @@ def test_mainConfig_hooks_all() -> None:
         }
     }
 
+def test_mainConfig_hooks() -> None:
+    """
+    Test full hooks getter
+    """
+    mainConfig4 = MainConfig("../tests/configs/config3.yaml")
+
+    assert mainConfig4.getHooks() == {
+
+    }
+
+
 #     result = mainConfig1.getHooks()
 #     assert result == {
 #         "general_setup": {

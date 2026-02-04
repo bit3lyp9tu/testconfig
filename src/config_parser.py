@@ -8,7 +8,7 @@ from pathlib import Path
 import csv
 import yaml
 
-from hook import Hook, HookType
+from hook import Hook, HookType, GeneralLayer, FileLayer, FunctionLayer
 
 
 def deep_merge(base: dict, override: dict) -> dict:
@@ -187,43 +187,62 @@ class MainConfig:
 
     def getHooks(self) -> dict[str, dict]:
 
-        # erstelle General layer
+        result: dict = {}
 
-        # for language in self.getLanguages():
-
-        #   erstelle File Layer (general_layer, language(s))
-
-        #       for script in self.getScripts(language):
-
-        #           erstelle Function Layer (file_layer, script(s))
-
-
-        # return function_layer.toData()
-
-
-        result: ConfigStructure = ConfigStructure()
-
-        result.addGeneral(HookType.GENERAL_SETUP, self.getHookGeneral(HookType.GENERAL_SETUP).toDict())
-        result.addGeneral(HookType.GENERAL_SHUTDOWN, self.getHookGeneral(HookType.GENERAL_SHUTDOWN).toDict())
+        general_layer = GeneralLayer(
+            self.getHookGeneral(HookType.GENERAL_SETUP),
+            self.getHookGeneral(HookType.GENERAL_SHUTDOWN)
+        )
 
         for language in self.getLanguages():
             if language in self.getLanguages() and self.content[language] != None:
 
-                result.addFile(HookType.FILE_SETUP, language, self.getHookFile(HookType.FILE_SETUP, language).toDict())
-                result.addFile(HookType.FILE_SHUTDOWN, language, self.getHookFile(HookType.FILE_SHUTDOWN, language).toDict())
+                file_layer = FileLayer(
+                    general_layer,
+                    language,
+                    self.getHookFile(HookType.FILE_SETUP, language),
+                    self.getHookFile(HookType.FILE_SHUTDOWN, language)
+                )
 
                 for script in self.getScripts(language):
                     if script in self.content[language] and self.content[language][script] != None:
 
-                        result.addFunction(HookType.FUNCTION_SETUP, language, script, self.getHookFunction(HookType.FUNCTION_SETUP, language, script).toDict())
-                        result.addFunction(HookType.FUNCTION_SHUTDOWN, language, script, self.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script).toDict())
-            else:
-                result.data["file_setup"][language] = {}
-                result.data["file_shutdown"][language] = {}
-                result.data["function_setup"][language] = {}
-                result.data["function_shutdown"][language] = {}
+                        function_layer = FunctionLayer(
+                            file_layer,
+                            language,
+                            script,
+                            self.getHookFunction(HookType.FUNCTION_SETUP, language, script),
+                            self.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script)
+                        )
+                        result.update(function_layer.toData())
+                result.update(file_layer.toData())
+        result.update(general_layer.toData())
 
-        return result.data
+        return result
+
+        # result: ConfigStructure = ConfigStructure()
+
+        # result.addGeneral(HookType.GENERAL_SETUP, self.getHookGeneral(HookType.GENERAL_SETUP).toDict())
+        # result.addGeneral(HookType.GENERAL_SHUTDOWN, self.getHookGeneral(HookType.GENERAL_SHUTDOWN).toDict())
+
+        # for language in self.getLanguages():
+        #     if language in self.getLanguages() and self.content[language] != None:
+
+        #         result.addFile(HookType.FILE_SETUP, language, self.getHookFile(HookType.FILE_SETUP, language).toDict())
+        #         result.addFile(HookType.FILE_SHUTDOWN, language, self.getHookFile(HookType.FILE_SHUTDOWN, language).toDict())
+
+        #         for script in self.getScripts(language):
+        #             if script in self.content[language] and self.content[language][script] != None:
+
+        #                 result.addFunction(HookType.FUNCTION_SETUP, language, script, self.getHookFunction(HookType.FUNCTION_SETUP, language, script).toDict())
+        #                 result.addFunction(HookType.FUNCTION_SHUTDOWN, language, script, self.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script).toDict())
+        #     else:
+        #         result.data["file_setup"][language] = {}
+        #         result.data["file_shutdown"][language] = {}
+        #         result.data["function_setup"][language] = {}
+        #         result.data["function_shutdown"][language] = {}
+
+        # return result.data
 
     def getHookGeneral(self, hook_type: HookType) -> Hook:
         hook_type_str: str = str(hook_type).lower()
