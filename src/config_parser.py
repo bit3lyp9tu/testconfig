@@ -44,7 +44,9 @@ class ConfigStructure:
 
     def addFile(self, hook_type: HookType, language: str, data: dict) -> None:
         if hook_type.value == HookType.FILE_SETUP.value:
-            self.data["file_setup"][language] = deep_merge(self.data["general_setup"], data)
+            self.data["file_setup"][language] = {
+                "attributes": deep_merge(self.data["general_setup"].get("attributes", {}), data.get("attributes", {}))
+            }
             self.data["file_shutdown"][language] =  {
                 "attributes": deep_merge(self.data["file_setup"].get(language, {}).get("attributes", {}), data.get("attributes", {}))
             }
@@ -184,6 +186,21 @@ class MainConfig:
         return results
 
     def getHooks(self) -> dict[str, dict]:
+
+        # erstelle General layer
+
+        # for language in self.getLanguages():
+
+        #   erstelle File Layer (general_layer, language(s))
+
+        #       for script in self.getScripts(language):
+
+        #           erstelle Function Layer (file_layer, script(s))
+
+
+        # return function_layer.toData()
+
+
         result: ConfigStructure = ConfigStructure()
 
         result.addGeneral(HookType.GENERAL_SETUP, self.getHookGeneral(HookType.GENERAL_SETUP).toDict())

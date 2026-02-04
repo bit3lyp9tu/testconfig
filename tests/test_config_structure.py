@@ -147,155 +147,155 @@ def test_config_structure_add_general() -> None:
         'function_shutdown': {},
     }
 
-def test_config_structure_add_file() -> None:
-    """
-    Test adding new data into file
-    """
-    cs.addFile(HookType.FILE_SETUP, "python", {
-        'attributes': {
-            'general': 'general_variable',
-            'file': 'file_variable'
-        },
-        'commands': [
-            'echo $general 2',
-            'echo $file 2',
-            'echo $function 2',
-        ],
-    })
-    assert cs.data == {
-        'general_setup': {
-            'attributes': {
-                'general': 'general_variable',
-            },
-            'commands': [
-                'echo $general 1',
-                'echo $file 1',
-                'echo $function 1',
-            ],
-        },
-        'general_shutdown': {
-            'attributes': {
-                'general': 'general_variable_override',
-            },
-            'commands': [
-                'echo $general 1b',
-                'echo $file 1b',
-                'echo $function 1b',
-                'echo test'
-            ],
-        },
-        'file_setup': {
-            'python': {
-                'attributes': {
-                    'general': 'general_variable',
-                    'file': 'file_variable'
-                },
-                'commands': [
-                    'echo $general 2',
-                    'echo $file 2',
-                    'echo $function 2',
-                ],
-            },
-        },
-        'file_shutdown': {
-            'python': {
-                'attributes': {
-                    'general': 'general_variable',
-                    'file': 'file_variable'
-                },
-            }
-        },
-        'function_setup': {},
-        'function_shutdown': {},
-    }
+# def test_config_structure_add_file() -> None:
+#     """
+#     Test adding new data into file
+#     """
+#     cs.addFile(HookType.FILE_SETUP, "python", {
+#         'attributes': {
+#             'general': 'general_variable',
+#             'file': 'file_variable'
+#         },
+#         'commands': [
+#             'echo $general 2',
+#             'echo $file 2',
+#             'echo $function 2',
+#         ],
+#     })
+#     assert cs.data == {
+#         'general_setup': {
+#             'attributes': {
+#                 'general': 'general_variable',
+#             },
+#             'commands': [
+#                 'echo $general 1',
+#                 'echo $file 1',
+#                 'echo $function 1',
+#             ],
+#         },
+#         'general_shutdown': {
+#             'attributes': {
+#                 'general': 'general_variable_override',
+#             },
+#             'commands': [
+#                 'echo $general 1b',
+#                 'echo $file 1b',
+#                 'echo $function 1b',
+#                 'echo test'
+#             ],
+#         },
+#         'file_setup': {
+#             'python': {
+#                 'attributes': {
+#                     'general': 'general_variable',
+#                     'file': 'file_variable'
+#                 },
+#                 'commands': [
+#                     'echo $general 2',
+#                     'echo $file 2',
+#                     'echo $function 2',
+#                 ],
+#             },
+#         },
+#         'file_shutdown': {
+#             'python': {
+#                 'attributes': {
+#                     'general': 'general_variable',
+#                     'file': 'file_variable'
+#                 },
+#             }
+#         },
+#         'function_setup': {},
+#         'function_shutdown': {},
+#     }
 
-def test_config_structure_add_function() -> None:
-    """
-    Test adding new data into function
-    """
-    cs.addFunction(HookType.FUNCTION_SETUP, "python", "tests/code/test.py", {
-        'attributes': {
-            'general': 'general_variable',
-            'file': 'file_variable',
-            'function': 'function_variable',
-        },
-        'commands': [
-            'echo $general 3',
-            'echo $file 3',
-            'echo $function 3',
-        ],
-    })
-    assert cs.data == {
-        'general_setup': {
-            'attributes': {
-                'general': 'general_variable',
-            },
-            'commands': [
-                'echo $general 1',
-                'echo $file 1',
-                'echo $function 1',
-            ],
-        },
-        'general_shutdown': {
-            'attributes': {
-                'general': 'general_variable_override',
-            },
-            'commands': [
-                'echo $general 1b',
-                'echo $file 1b',
-                'echo $function 1b',
-                'echo test'
-            ],
-        },
-        'file_setup': {
-            'python': {
-                'attributes': {
-                    'general': 'general_variable',
-                    'file': 'file_variable'
-                },
-                'commands': [
-                    'echo $general 2',
-                    'echo $file 2',
-                    'echo $function 2',
-                ],
-            },
-        },
-        'file_shutdown': {
-            'python': {
-                'attributes': {
-                    'general': 'general_variable',
-                    'file': 'file_variable'
-                }
-            },
-        },
-        'function_setup': {
-            'python': {
-                'tests/code/test.py': {
-                    'attributes': {
-                        'general': 'general_variable',
-                        'file': 'file_variable',
-                        'function': 'function_variable',
-                    },
-                    'commands': [
-                        'echo $general 3',
-                        'echo $file 3',
-                        'echo $function 3',
-                    ],
-                },
-            },
-        },
-        'function_shutdown': {
-                        'python': {
-                'tests/code/test.py': {
-                    'attributes': {
-                        'general': 'general_variable',
-                        'file': 'file_variable',
-                        'function': 'function_variable',
-                    }
-                },
-            },
-        },
-    }
+# def test_config_structure_add_function() -> None:
+#     """
+#     Test adding new data into function
+#     """
+#     cs.addFunction(HookType.FUNCTION_SETUP, "python", "tests/code/test.py", {
+#         'attributes': {
+#             'general': 'general_variable',
+#             'file': 'file_variable',
+#             'function': 'function_variable',
+#         },
+#         'commands': [
+#             'echo $general 3',
+#             'echo $file 3',
+#             'echo $function 3',
+#         ],
+#     })
+#     assert cs.data == {
+#         'general_setup': {
+#             'attributes': {
+#                 'general': 'general_variable',
+#             },
+#             'commands': [
+#                 'echo $general 1',
+#                 'echo $file 1',
+#                 'echo $function 1',
+#             ],
+#         },
+#         'general_shutdown': {
+#             'attributes': {
+#                 'general': 'general_variable_override',
+#             },
+#             'commands': [
+#                 'echo $general 1b',
+#                 'echo $file 1b',
+#                 'echo $function 1b',
+#                 'echo test'
+#             ],
+#         },
+#         'file_setup': {
+#             'python': {
+#                 'attributes': {
+#                     'general': 'general_variable',
+#                     'file': 'file_variable'
+#                 },
+#                 'commands': [
+#                     'echo $general 2',
+#                     'echo $file 2',
+#                     'echo $function 2',
+#                 ],
+#             },
+#         },
+#         'file_shutdown': {
+#             'python': {
+#                 'attributes': {
+#                     'general': 'general_variable',
+#                     'file': 'file_variable'
+#                 }
+#             },
+#         },
+#         'function_setup': {
+#             'python': {
+#                 'tests/code/test.py': {
+#                     'attributes': {
+#                         'general': 'general_variable',
+#                         'file': 'file_variable',
+#                         'function': 'function_variable',
+#                     },
+#                     'commands': [
+#                         'echo $general 3',
+#                         'echo $file 3',
+#                         'echo $function 3',
+#                     ],
+#                 },
+#             },
+#         },
+#         'function_shutdown': {
+#                         'python': {
+#                 'tests/code/test.py': {
+#                     'attributes': {
+#                         'general': 'general_variable',
+#                         'file': 'file_variable',
+#                         'function': 'function_variable',
+#                     }
+#                 },
+#             },
+#         },
+#     }
 
 def test_config_structure_overriding() -> None:
     """

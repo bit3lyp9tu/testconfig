@@ -41,13 +41,6 @@ class Hook:
         self.commands: list[str] = commands
         self.description: str = description
 
-    # def __dict__(self) -> dict[str, dict[str, str] | list[str] | str]:
-    #     return {
-    #         "attributes": self.attributes,
-    #         "commands": self.commands,
-    #         "description": self.description
-    #     }
-
     def toDict(self) ->  dict[str, dict[str, str] | list[str] | str]:
         result: dict[str, dict[str, str] | list[str] | str] = {}
         if self.attributes != {}:
@@ -68,3 +61,68 @@ class Hook:
             and self.commands == other.commands
             and self.description == other.description
         )
+
+
+class Layer:
+    def __init__(self) -> None:
+        self.data: dict = {}
+
+    def toData(self) -> dict:
+        return self.data
+
+class GeneralLayer(Layer):
+    def __init__(self, setup: Hook, shutdown: Hook) -> None:
+        super().__init__()
+        self.general_setup: Hook = setup
+        self.general_shutdown: Hook = shutdown
+
+        self.general_shutdown.attributes.update(setup.attributes)
+
+        self.data["general_setup"] = self.general_setup.toDict()
+        self.data["general_shutdown"] = self.general_shutdown.toDict()
+
+class FileLayer(GeneralLayer):
+    def __init__(self, general_layer: GeneralLayer, language: str, setup: Hook, shutdown: Hook) -> None:
+        super().__init__(
+            general_layer.general_setup,
+            general_layer.general_shutdown
+        )
+
+        self.file_setup: Hook = setup
+        self.file_setup.attributes.update(self.general_setup.attributes)
+
+        self.file_shutdown: Hook = shutdown
+        self.file_shutdown.attributes.update(self.file_setup.attributes)
+
+        self.data["file_setup"] = {
+            language: self.file_setup.toDict()
+        }
+        self.data["file_shutdown"] = {
+            language: self.file_shutdown.toDict()
+        }
+
+class FunctionLayer(FileLayer):
+    def __init__(self, file_layer: FileLayer, language: str, file: str, setup: Hook, shutdown: Hook) -> None:
+        super().__init__(
+            GeneralLayer(file_layer.general_setup, file_layer.general_shutdown),
+            language,
+            file_layer.file_setup,
+            file_layer.file_shutdown
+        )
+
+        self.function_setup: Hook = setup
+        self.function_setup.attributes.update(self.file_setup.attributes)
+
+        self.function_shutdown: Hook = shutdown
+        self.function_shutdown.attributes.update(self.function_setup.attributes)
+
+        self.data["function_setup"] = {
+            language: {
+                file: self.function_setup.toDict()
+            }
+        }
+        self.data["function_shutdown"] = {
+            language: {
+                file: self.function_shutdown.toDict()
+            }
+        }
