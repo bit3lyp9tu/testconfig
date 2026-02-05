@@ -24,14 +24,17 @@ class LogLevel:
 class LogLevels:
     # TODO needs better name
 
-    def __init__(self, *args) -> None:
-        self.log_lvl_s: list[LogLevel] = list(args)
+    def __init__(self, debug_level: int = 0, *args) -> None:
+        self.debug_level: int = debug_level
+        self.log_lvl_s: dict[int, LogLevel] = {i.level: i for i in list(args)}
 
     def print(self, priority: int = 0, text: str = ""):
-        for i in self.log_lvl_s:
-            if priority == i.level:
-                print(f"[bold {i.color}]{i.prefix}[/bold {i.color}]\t{text}")
-                break
+        for k, v in self.log_lvl_s.items():
+            if priority >= self.debug_level and k == priority:
+                print(f"[bold {v.color}]{v.prefix}[/bold {v.color}]\t{text}")
+
+    def getLevels(self) -> list[int]:
+        return [i for i in self.log_lvl_s.keys()]
 
 
 class Script:
@@ -212,14 +215,7 @@ class Writer:
 
 
 class RunController:
-
-    LOGS = LogLevels(
-        LogLevel(1, "[INFO]", "dodger_blue2"),
-        LogLevel(2, "[WARN]", "yellow1"),
-        LogLevel(3, "[ERROR]", "bright_red")
-    )
-
-    def __init__(self, config_path: str, lang_path: str) -> None:
+    def __init__(self, config_path: str, lang_path: str, logs: LogLevels = LogLevels(0)) -> None:
         self.mainConfig = MainConfig(config_path)
 
         self.lang_path = lang_path
@@ -230,6 +226,13 @@ class RunController:
 
             if Path(os.path.join(os.path.dirname(__file__), path)).is_file():
                 self.langConfigs[path] = LangConfig(path)
+
+        self.LOGS = logs
+
+        if self.LOGS.debug_level == 0 or self.LOGS.debug_level in self.LOGS.getLevels():
+            pass
+        else:
+            raise ValueError(f"Invalid debug level")
 
 
     def getJoinedHook(self, hook_type: HookType = HookType.NONE, language: str = "", file: str = "") -> Hook:

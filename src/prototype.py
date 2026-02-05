@@ -3,7 +3,7 @@ import argparse
 
 from pathlib import Path
 
-from file_builder import Writer, RunController, LogLevel
+from file_builder import Writer, RunController, LogLevel, LogLevels
 
 LOG4 = LogLevel(4, "[FATAL]", "dark_orange3")
 
@@ -25,18 +25,32 @@ parser.add_argument(
 parser.add_argument(
     "-r", "--report", help="set the name of the output file for the test report", type=str, default="test_report.txt"
 )
+parser.add_argument(
+    "-d", "--debug_level", help="choose between different log levels (the higher the number, the more detailed the output)", type=int, default=0
+)
 
 args = parser.parse_args()
 
-tester = RunController(args.config, args.lang_config_dict)
-Writer(tester.start(args.test_path, bool(args.keep_script_files))).write(args.report, False)
-# try:
-# except Exception as e:
-#     print(f"{e}")
+LOGS = LogLevels(
+    args.debug_level,
+    LogLevel(1, "[INFO]", "dodger_blue2"),
+    LogLevel(2, "[WARN]", "yellow1"),
+    LogLevel(3, "[ERROR]", "bright_red"),
+    LogLevel(4, "[FATAL]", "rosy_brown")
+)
 
-# python3 test.py (./test.py oder source pip install test)
-# -> innerhalb des python codes:
-#   -> generiert er als erstes das skript
-#   -> führt es dann mit subprocess oder so aus
-# -> INNERHALB dieser test.py
-# print(f"[FAIL] {testname} failed")
+try:
+    tester = RunController(
+        args.config,
+        args.lang_config_dict,
+        LOGS
+    )
+    Writer(
+        tester.start(
+            args.test_path,
+            bool(args.keep_script_files)
+        )
+    ).write(args.report, False)
+
+except Exception as e:
+    LOGS.print(4, f"{e}")
