@@ -1,6 +1,6 @@
 general_setup:
-    commands:
-        - "$invalid_path"
+    # commands:
+    #     - "$invalid_path"
 python:
     file_setup:
         # commands:

@@ -1,7 +1,7 @@
 import mypy
 import pytest
 
-from src.config_parser import ConfigStructure
+from src.config_parser import *
 from src.file_builder import RunController, Writer
 from src.hook import HookType
 
@@ -94,94 +94,34 @@ def test_run_controller_join_hook_file_shutdown() -> None:
             "echo SHUTDOWN"
         ]
     }
-# def test_run_controller_join_hook_function_setup() -> None:
-#     """
-#     Test the function setup hook joiner of main config and lang config
-#     """
+def test_run_controller_join_hook_function_setup() -> None:
+    """
+    Test the function setup hook joiner of main config and lang config
+    """
 
-#     conf_struct = ConfigStructure()
-#     conf_struct.addFile(
-#         HookType.FILE_SETUP,
-#         "python",
-#         test_runs1.mainConfig.getHookFile(HookType.FILE_SETUP, "python").toDict()
-#     )
-#     conf_struct.addFunction(
-#         HookType.FUNCTION_SETUP,
-#         "python",
-#         "tests/code/test.py",
-#         test_runs1.mainConfig.getHookFunction(HookType.FUNCTION_SETUP, "python", "tests/code/test.py").toDict()
-#     )
-#     conf_struct.addFunction(
-#         HookType.FUNCTION_SHUTDOWN,
-#         "python",
-#         "tests/code/test.py",
-#         test_runs1.mainConfig.getHookFunction(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py").toDict()
-#     )
-#     assert conf_struct.data == {
-#         'file_setup': {
-#             'python': {
-#                 'attributes': {
-#                     'path': 'new_path_overrides_old_one',
-#                 },
-#                 'commands': [
-#                     'echo OVERRIDDEN',
-#                 ],
-#             },
-#         },
-#         'file_shutdown': {
-#             'python': {
-#                 'attributes': {
-#                     'path': 'new_path_overrides_old_one',
-#                 },
-#             },
-#         },
-#         'function_setup': {
-#             'python': {
-#                 'tests/code/test.py': {
-#                     'attributes': {
-#                         'path': 'src/tests',
-#                         'target': 'add',
-#                     },
-#                 },
-#             },
-#         },
-#         'function_shutdown': {
-#             'python': {
-#                 'tests/code/test.py': {
-#                     'attributes': {
-#                         'path': 'src/tests',
-#                         'target': 'add',
-#                     },
-#                 },
-#             },
-#         },
-#         'general_setup': {},
-#         'general_shutdown': {},
-#     }
+    result = test_runs1.mainConfig.getHooks()
+    assert result["function_setup"] == {
+        "php": {},
+        "cpp": {},
+        "python": {
+            "tests/code/test.py": {
+                "attributes": {
+                    "path": "src/tests",
+                    "target": "add"
+                }
+            }
+        }
+    }
 
-#     result = test_runs1.mainConfig.getHooks()
-#     assert result["function_setup"] == {
-#         "php": {},
-#         "cpp": {},
-#         "python": {
-#             "tests/code/test.py": {
-#                 "attributes": {
-#                     "path": "src/tests",
-#                     "target": "add"
-#                 }
-#             }
-#         }
-#     }
-
-#     hook_function_setup = test_runs1.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py")
-#     assert hook_function_setup.toDict() == {
-#         "attributes": {
-#             "path": "src/tests",
-#             "target": "add"
-#         }
-#     }
-#     hook_function_setup = test_runs1.getJoinedHook(HookType.FUNCTION_SETUP, "")
-#     assert hook_function_setup.toDict() == {}
+    hook_function_setup = test_runs1.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py")
+    assert hook_function_setup.toDict() == {
+        "attributes": {
+            "path": "src/tests",
+            "target": "add"
+        }
+    }
+    hook_function_setup = test_runs1.getJoinedHook(HookType.FUNCTION_SETUP, "")
+    assert hook_function_setup.toDict() == {}
 
 def test_run_controller_join_hook_function_shutdown() -> None:
     """
@@ -197,47 +137,47 @@ def test_run_controller_join_hook_function_shutdown() -> None:
     }
 
 test_runs3 = RunController("../tests/configs/config3.yaml", "../tests/configs/lang3")
-# def test_run_controller_check_environment_scope() -> None:
-#     """
-#     Test if scope of environmental variables is correct
-#     """
+def test_run_controller_check_environment_scope() -> None:
+    """
+    Test if scope of environmental variables is correct
+    """
 
-#     out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.GENERAL_SETUP, "python"))
-#     assert out_file == [
-#         "general_variable 1",
-#         "Missing environment variable: [$file]",
-#         "Missing environment variable: [$function]",
-#     ]
-#     out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FILE_SETUP, "python"))
-#     assert out_file == [
-#         "general_variable 2",
-#         "file_variable 2",
-#         "Missing environment variable: [$function]",
-#     ]
-#     out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"))
-#     assert out_file == [
-#         "general_variable 3",
-#         "file_variable 3",
-#         "function_variable 3"
-#     ]
-#     out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py"))
-#     assert out_file == [
-#         "general_variable 3b",
-#         "file_variable 3b",
-#         "function_variable 3b"
-#     ]
-#     out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FILE_SHUTDOWN, "python"))
-#     assert out_file == [
-#         "general_variable 2b",
-#         "file_variable 2b",
-#         "Missing environment variable: [$function]",
-#     ]
-#     out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python"))
-#     assert out_file == [
-#         "general_variable 1b",
-#         "Missing environment variable: [$file]",
-#         "Missing environment variable: [$function]",
-#     ]
+    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.GENERAL_SETUP, "python"))
+    assert out_file == [
+        "general_variable 1",
+        "Missing environment variable: [$file]",
+        "Missing environment variable: [$function]",
+    ]
+    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FILE_SETUP, "python"))
+    assert out_file == [
+        "general_variable 2",
+        "file_variable 2",
+        "Missing environment variable: [$function]",
+    ]
+    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"))
+    assert out_file == [
+        "general_variable 3",
+        "file_variable 3",
+        "function_variable 3"
+    ]
+    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py"))
+    assert out_file == [
+        "general_variable 3b",
+        "file_variable 3b",
+        "function_variable 3b"
+    ]
+    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FILE_SHUTDOWN, "python"))
+    assert out_file == [
+        "general_variable 2b",
+        "file_variable 2b",
+        "Missing environment variable: [$function]",
+    ]
+    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python"))
+    assert out_file == [
+        "general_variable 1b",
+        "Missing environment variable: [$file]",
+        "Missing environment variable: [$function]",
+    ]
 
 def test_run_controller_start() -> None:
     """

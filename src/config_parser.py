@@ -5,72 +5,12 @@ import mypy
 
 from pathlib import Path
 
+from collections import defaultdict
+
 import csv
 import yaml
 
-from hook import Hook, HookType, GeneralLayer, FileLayer, FunctionLayer
-
-
-def deep_merge(base: dict, override: dict) -> dict:
-    result = base.copy()
-    for k, v in override.items():
-        if (
-            k in result
-            and isinstance(result[k], dict)
-            and isinstance(v, dict)
-        ):
-            result[k] = deep_merge(result[k], v)
-        else:
-            result[k] = v
-    return result
-
-class ConfigStructure:
-    def __init__(self) -> None:
-        self.data: dict = {
-            "general_setup": {},
-            "general_shutdown": {},
-            "file_setup": {},
-            "file_shutdown": {},
-            "function_setup": {},
-            "function_shutdown": {}
-        }
-
-    def addGeneral(self, hook_type: HookType, data: dict) -> None:
-        if hook_type.value == HookType.GENERAL_SETUP.value:
-            self.data["general_setup"] = deep_merge({}, data)
-            self.data["general_shutdown"]["attributes"] = deep_merge({}, data.get("attributes", {}))
-        elif hook_type.value == HookType.GENERAL_SHUTDOWN.value:
-            self.data["general_shutdown"] = deep_merge(self.data["general_setup"], data)
-
-    def addFile(self, hook_type: HookType, language: str, data: dict) -> None:
-        if hook_type.value == HookType.FILE_SETUP.value:
-            self.data["file_setup"][language] = {
-                "attributes": deep_merge(self.data["general_setup"].get("attributes", {}), data.get("attributes", {}))
-            }
-            self.data["file_shutdown"][language] =  {
-                "attributes": deep_merge(self.data["file_setup"].get(language, {}).get("attributes", {}), data.get("attributes", {}))
-            }
-        elif hook_type.value == HookType.FILE_SHUTDOWN.value:
-            self.data["file_shutdown"][language] = deep_merge(self.data["file_setup"].get(language, {}), data)
-
-    def addFunction(self, hook_type: HookType, language: str, script: str, data: dict) -> None:
-        if hook_type.value == HookType.FUNCTION_SETUP.value:
-            self.data["function_setup"][language] = {
-                script: {
-                    "attributes": deep_merge(self.data["file_setup"].get(language, {}).get("attributes", {}), data.get("attributes", {}))
-                }
-            }
-            self.data["function_setup"][language] = {
-                script: deep_merge(self.data["function_setup"][language][script], data)
-            }
-
-            self.data["function_shutdown"][language] = {
-                script: {
-                    "attributes": deep_merge(self.data["function_setup"][language].get(script, {}).get("attributes", {}), data.get("attributes", {}))
-                }
-            }
-        elif hook_type.value == HookType.FUNCTION_SHUTDOWN.value:
-            self.data["function_shutdown"][language][script] = deep_merge(self.data["function_setup"][language].get(script, {}), data)
+from hook import Hook, HookType, GeneralLayer, FileLayer, FunctionLayer, to_dict
 
 
 class MainConfig:
@@ -187,8 +127,6 @@ class MainConfig:
 
     def getHooks(self) -> dict[str, dict]:
 
-        result: dict = {}
-
         general_layer = GeneralLayer(
             self.getHookGeneral(HookType.GENERAL_SETUP),
             self.getHookGeneral(HookType.GENERAL_SHUTDOWN)
@@ -214,35 +152,18 @@ class MainConfig:
                             self.getHookFunction(HookType.FUNCTION_SETUP, language, script),
                             self.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script)
                         )
-                        result.update(function_layer.toData())
-                result.update(file_layer.toData())
-        result.update(general_layer.toData())
+                        file_layer.merge(function_layer.toData())
+                general_layer.merge(file_layer.toData())
 
-        return result
+            else:
+                general_layer.merge({
+                    "file_setup": {language: {}},
+                    "file_shutdown": {language: {}},
+                    "function_setup": {language: {}},
+                    "function_shutdown": {language: {}},
+                })
+        return to_dict(general_layer.toData())
 
-        # result: ConfigStructure = ConfigStructure()
-
-        # result.addGeneral(HookType.GENERAL_SETUP, self.getHookGeneral(HookType.GENERAL_SETUP).toDict())
-        # result.addGeneral(HookType.GENERAL_SHUTDOWN, self.getHookGeneral(HookType.GENERAL_SHUTDOWN).toDict())
-
-        # for language in self.getLanguages():
-        #     if language in self.getLanguages() and self.content[language] != None:
-
-        #         result.addFile(HookType.FILE_SETUP, language, self.getHookFile(HookType.FILE_SETUP, language).toDict())
-        #         result.addFile(HookType.FILE_SHUTDOWN, language, self.getHookFile(HookType.FILE_SHUTDOWN, language).toDict())
-
-        #         for script in self.getScripts(language):
-        #             if script in self.content[language] and self.content[language][script] != None:
-
-        #                 result.addFunction(HookType.FUNCTION_SETUP, language, script, self.getHookFunction(HookType.FUNCTION_SETUP, language, script).toDict())
-        #                 result.addFunction(HookType.FUNCTION_SHUTDOWN, language, script, self.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script).toDict())
-        #     else:
-        #         result.data["file_setup"][language] = {}
-        #         result.data["file_shutdown"][language] = {}
-        #         result.data["function_setup"][language] = {}
-        #         result.data["function_shutdown"][language] = {}
-
-        # return result.data
 
     def getHookGeneral(self, hook_type: HookType) -> Hook:
         hook_type_str: str = str(hook_type).lower()

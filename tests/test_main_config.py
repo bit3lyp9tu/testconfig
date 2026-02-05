@@ -5,8 +5,10 @@ import pytest
 
 from pathlib import Path
 
+from collections import defaultdict
+
 from src.config_parser import MainConfig
-from src.hook import HookType, GeneralLayer, FileLayer, FunctionLayer
+from src.hook import HookType, GeneralLayer, FileLayer, FunctionLayer, to_dict
 
 
 mainConfig1: MainConfig = MainConfig("../tests/configs/config1.yaml")
@@ -137,6 +139,226 @@ def test_mainConfig_content_functions_content_data_list() -> None:
         ([0.5,10.0,-1.0], [-5.0])
     ]
 
+DATA_GENERAL_LAYER3 = {
+    'general_setup': {
+        'attributes': {
+            'general': 'general_variable',
+        },
+        'commands': [
+            'echo $general 1',
+            'echo $file 1',
+            'echo $function 1',
+        ],
+    },
+    'general_shutdown': {
+        'attributes': {
+            'general': 'general_variable',
+        },
+        'commands': [
+            'echo $general 1b',
+            'echo $file 1b',
+            'echo $function 1b',
+        ],
+    },
+    'file_setup': {},
+    'file_shutdown': {},
+    'function_setup': {},
+    'function_shutdown': {},
+}
+
+DATA_FILE_LAYER3 = {
+    'file_setup': {
+        'python': {
+            'attributes': {
+                'general': 'general_variable',
+                'file': 'file_variable'
+            },
+            'commands': [
+                'echo $general 2',
+                'echo $file 2',
+                'echo $function 2',
+            ],
+        },
+    },
+    'file_shutdown': {
+        'python': {
+            'attributes': {
+                'general': 'general_variable',
+                'file': 'file_variable'
+            },
+            'commands': [
+                'echo $general 2b',
+                'echo $file 2b',
+                'echo $function 2b',
+            ],
+        },
+    },
+    'general_setup': {
+        'attributes': {
+            'general': 'general_variable',
+        },
+        'commands': [
+            'echo $general 1',
+            'echo $file 1',
+            'echo $function 1',
+        ],
+    },
+    'general_shutdown': {
+        'attributes': {
+            'general': 'general_variable',
+        },
+        'commands': [
+            'echo $general 1b',
+            'echo $file 1b',
+            'echo $function 1b',
+        ],
+    },
+    'function_setup': {},
+    'function_shutdown': {},
+}
+
+DATA_FUNCTION_LAYER3 = {
+    'function_setup': {
+        'python': {
+            'tests/code/test.py': {
+                'attributes': {
+                    'general': 'general_variable',
+                    'file': 'file_variable',
+                    'function': 'function_variable',
+                },
+                'commands': [
+                    'echo $general 3',
+                    'echo $file 3',
+                    'echo $function 3',
+                ],
+            },
+        },
+    },
+    'function_shutdown': {
+        'python': {
+            'tests/code/test.py': {
+                'attributes': {
+                    'general': 'general_variable',
+                    'file': 'file_variable',
+                    'function': 'function_variable',
+                },
+                'commands': [
+                    'echo $general 3b',
+                    'echo $file 3b',
+                    'echo $function 3b',
+                ],
+            },
+        },
+    },
+    'file_setup': {
+        'python': {
+            'attributes': {
+                'general': 'general_variable',
+                'file': 'file_variable'
+            },
+            'commands': [
+                'echo $general 2',
+                'echo $file 2',
+                'echo $function 2',
+            ],
+        },
+    },
+    'file_shutdown': {
+        'python': {
+            'attributes': {
+                'general': 'general_variable',
+                'file': 'file_variable'
+            },
+            'commands': [
+                'echo $general 2b',
+                'echo $file 2b',
+                'echo $function 2b',
+            ],
+        },
+    },
+    'general_setup': {
+        'attributes': {
+            'general': 'general_variable',
+        },
+        'commands': [
+            'echo $general 1',
+            'echo $file 1',
+            'echo $function 1',
+        ],
+    },
+    'general_shutdown': {
+        'attributes': {
+            'general': 'general_variable',
+        },
+        'commands': [
+            'echo $general 1b',
+            'echo $file 1b',
+            'echo $function 1b',
+        ],
+    }
+}
+
+DATA_CONFIG1 = {
+        "general_setup": {
+            "attributes": {
+                "path": "a_random_path"
+            }
+        },
+        "general_shutdown": {
+            "attributes": {
+                "path": "a_random_path"
+            }
+        },
+        "file_setup": {
+            "python": {
+                "attributes": {
+                    "path": "new_path_overrides_old_one"
+                },
+                "commands": [
+                    "echo OVERRIDDEN"
+                ]
+            },
+            "php": {},
+            "cpp": {}
+        },
+        "file_shutdown": {
+            "python": {
+                "attributes": {
+                    "path": "new_path_overrides_old_one"
+                },
+                "commands": [
+                    "echo SHUTDOWN"
+                ]
+            },
+            "php": {},
+            "cpp": {}
+        },
+        "function_setup": {
+            "python": {
+                "tests/code/test.py": {
+                    "attributes": {
+                        "path": "src/tests",
+                        "target": "add"
+                    }
+                }
+            },
+            "php": {},
+            "cpp": {}
+        },
+        "function_shutdown": {
+            "python": {
+                "tests/code/test.py": {
+                    "attributes": {
+                        "path": "src/tests",
+                        "target": "add"
+                    }
+                }
+            },
+            "php": {},
+            "cpp": {}
+        }
+    }
+
 def test_mainConfig_hooks_all() -> None:
     """
     Test if hooks getter returns all hooks from config file
@@ -147,28 +369,7 @@ def test_mainConfig_hooks_all() -> None:
         mainConfig4.getHookGeneral(HookType.GENERAL_SETUP),
         mainConfig4.getHookGeneral(HookType.GENERAL_SHUTDOWN)
     )
-    assert general_layer.toData() == {
-        'general_setup': {
-            'attributes': {
-                'general': 'general_variable',
-            },
-            'commands': [
-                'echo $general 1',
-                'echo $file 1',
-                'echo $function 1',
-            ],
-        },
-        'general_shutdown': {
-            'attributes': {
-                'general': 'general_variable',
-            },
-            'commands': [
-                'echo $general 1b',
-                'echo $file 1b',
-                'echo $function 1b',
-            ],
-        },
-    }
+    assert general_layer.toData() == DATA_GENERAL_LAYER3
 
     file_layer = FileLayer(
         general_layer,
@@ -176,54 +377,7 @@ def test_mainConfig_hooks_all() -> None:
         mainConfig4.getHookFile(HookType.FILE_SETUP, "python"),
         mainConfig4.getHookFile(HookType.FILE_SHUTDOWN, "python")
     )
-    assert file_layer.toData() ==   {
-        'file_setup': {
-            'python': {
-                'attributes': {
-                    'general': 'general_variable',
-                    'file': 'file_variable'
-                },
-                'commands': [
-                    'echo $general 2',
-                    'echo $file 2',
-                    'echo $function 2',
-                ],
-            },
-        },
-        'file_shutdown': {
-            'python': {
-                'attributes': {
-                    'general': 'general_variable',
-                    'file': 'file_variable'
-                },
-                'commands': [
-                    'echo $general 2b',
-                    'echo $file 2b',
-                    'echo $function 2b',
-                ],
-            },
-        },
-        'general_setup': {
-            'attributes': {
-                'general': 'general_variable',
-            },
-            'commands': [
-                'echo $general 1',
-                'echo $file 1',
-                'echo $function 1',
-            ],
-        },
-        'general_shutdown': {
-            'attributes': {
-                'general': 'general_variable',
-            },
-            'commands': [
-                'echo $general 1b',
-                'echo $file 1b',
-                'echo $function 1b',
-            ],
-        }
-    }
+    assert file_layer.toData() == DATA_FILE_LAYER3
 
     function_layer = FunctionLayer(
         file_layer,
@@ -232,86 +386,53 @@ def test_mainConfig_hooks_all() -> None:
         mainConfig4.getHookFunction(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"),
         mainConfig4.getHookFunction(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py")
     )
-    assert function_layer.toData() == {
-        'function_setup': {
-            'python': {
-                'tests/code/test.py': {
-                    'attributes': {
-                        'general': 'general_variable',
-                        'file': 'file_variable',
-                        'function': 'function_variable',
-                    },
-                    'commands': [
-                        'echo $general 3',
-                        'echo $file 3',
-                        'echo $function 3',
-                    ],
-                },
-            },
-        },
-        'function_shutdown': {
-            'python': {
-                'tests/code/test.py': {
-                    'attributes': {
-                        'general': 'general_variable',
-                        'file': 'file_variable',
-                        'function': 'function_variable',
-                    },
-                    'commands': [
-                        'echo $general 3b',
-                        'echo $file 3b',
-                        'echo $function 3b',
-                    ],
-                },
-            },
-        },
-        'file_setup': {
-            'python': {
-                'attributes': {
-                    'general': 'general_variable',
-                    'file': 'file_variable'
-                },
-                'commands': [
-                    'echo $general 2',
-                    'echo $file 2',
-                    'echo $function 2',
-                ],
-            },
-        },
-        'file_shutdown': {
-            'python': {
-                'attributes': {
-                    'general': 'general_variable',
-                    'file': 'file_variable'
-                },
-                'commands': [
-                    'echo $general 2b',
-                    'echo $file 2b',
-                    'echo $function 2b',
-                ],
-            },
-        },
-        'general_setup': {
-            'attributes': {
-                'general': 'general_variable',
-            },
-            'commands': [
-                'echo $general 1',
-                'echo $file 1',
-                'echo $function 1',
-            ],
-        },
-        'general_shutdown': {
-            'attributes': {
-                'general': 'general_variable',
-            },
-            'commands': [
-                'echo $general 1b',
-                'echo $file 1b',
-                'echo $function 1b',
-            ],
-        }
-    }
+    assert function_layer.toData() == DATA_FUNCTION_LAYER3
+
+
+def test_mainConfig_hook_layers_in_loop() -> None:
+    """
+    Test hook layers in loop
+    """
+    result: dict = defaultdict(dict)
+
+    general_layer = GeneralLayer(
+        mainConfig1.getHookGeneral(HookType.GENERAL_SETUP),
+        mainConfig1.getHookGeneral(HookType.GENERAL_SHUTDOWN)
+    )
+
+    for language in mainConfig1.getLanguages():
+        if language in mainConfig1.getLanguages() and mainConfig1.content[language] != None:
+
+            file_layer = FileLayer(
+                general_layer,
+                language,
+                mainConfig1.getHookFile(HookType.FILE_SETUP, language),
+                mainConfig1.getHookFile(HookType.FILE_SHUTDOWN, language)
+            )
+
+            for script in mainConfig1.getScripts(language):
+                    if script in mainConfig1.content[language] and mainConfig1.content[language][script] != None:
+
+                        function_layer = FunctionLayer(
+                            file_layer,
+                            language,
+                            script,
+                            mainConfig1.getHookFunction(HookType.FUNCTION_SETUP, language, script),
+                            mainConfig1.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script)
+                        )
+                        file_layer.merge(function_layer.toData())
+            general_layer.merge(file_layer.toData())
+
+        else:
+            general_layer.merge({
+                "file_setup": {language: {}},
+                "file_shutdown": {language: {}},
+                "function_setup": {language: {}},
+                "function_shutdown": {language: {}},
+            })
+
+    assert to_dict(general_layer.toData()) == DATA_CONFIG1
+
 
 def test_mainConfig_hooks() -> None:
     """
@@ -319,153 +440,12 @@ def test_mainConfig_hooks() -> None:
     """
     mainConfig4 = MainConfig("../tests/configs/config3.yaml")
 
-    assert mainConfig4.getHooks() == {
+    assert mainConfig4.getHooks() == DATA_FUNCTION_LAYER3
 
-    }
-
-
-#     result = mainConfig1.getHooks()
-#     assert result == {
-#         "general_setup": {
-#             "attributes": {
-#                 "path": "a_random_path"
-#             }
-#         },
-#         "general_shutdown": {
-#             "attributes": {
-#                 "path": "a_random_path"
-#             }
-#         },
-#         "file_setup": {
-#             "python": {
-#                 "attributes": {
-#                     "path": "new_path_overrides_old_one"
-#                 },
-#                 "commands": [
-#                     "echo OVERRIDDEN"
-#                 ]
-#             },
-#             "php": {},
-#             "cpp": {}
-#         },
-#         "file_shutdown": {
-#             "python": {
-#                 "attributes": {
-#                     "path": "new_path_overrides_old_one"
-#                 },
-#                 "commands": [
-#                     "echo SHUTDOWN"
-#                 ]
-#             },
-#             "php": {},
-#             "cpp": {}
-#         },
-#         "function_setup": {
-#             "python": {
-#                 "tests/code/test.py": {
-#                     "attributes": {
-#                         "path": "src/tests",
-#                         "target": "add"
-#                     }
-#                 }
-#             },
-#             "php": {},
-#             "cpp": {}
-#         },
-#         "function_shutdown": {
-#             "python": {
-#                 "tests/code/test.py": {
-#                     "attributes": {
-#                         "path": "src/tests",
-#                         "target": "add"
-#                     }
-#                 }
-#             },
-#             "php": {},
-#             "cpp": {}
-#         }
-#     }
-#     result3 = mainConfig3.getHooks()
-#     assert result3 == {
-#         'file_setup': {
-#             'python': {
-#                 'attributes': {
-#                     'general': 'general_variable',
-#                     'file': 'file_variable'
-#                 },
-#                 'commands': [
-#                     'echo $general 2',
-#                     'echo $file 2',
-#                     'echo $function 2',
-#                 ],
-#             },
-#         },
-#         'file_shutdown': {
-#             'python': {
-#                 'attributes': {
-#                     'general': 'general_variable',
-#                     'file': 'file_variable',
-#                 },
-#                 'commands': [
-#                     'echo $general 2b',
-#                     'echo $file 2b',
-#                     'echo $function 2b',
-#                 ],
-#             },
-#         },
-#         'function_setup': {
-#             'python': {
-#                 'tests/code/test.py': {
-#                     'attributes': {
-#                         'general': 'general_variable',
-#                         'file': 'file_variable',
-#                         'function': 'function_variable',
-#                     },
-#                     'commands': [
-#                         'echo $general 3',
-#                         'echo $file 3',
-#                         'echo $function 3',
-#                     ],
-#                 },
-#             },
-#         },
-#         'function_shutdown': {
-#             'python': {
-#                 'tests/code/test.py': {
-#                     'attributes': {
-#                         'general': 'general_variable',
-#                         'file': 'file_variable',
-#                         'function': 'function_variable',
-#                     },
-#                     'commands': [
-#                         'echo $general 3b',
-#                         'echo $file 3b',
-#                         'echo $function 3b',
-#                     ],
-#                 },
-#             },
-#         },
-#         'general_setup': {
-#             'attributes': {
-#                 'general': 'general_variable',
-#             },
-#             'commands': [
-#                 'echo $general 1',
-#                 'echo $file 1',
-#                 'echo $function 1',
-#             ],
-#         },
-#         'general_shutdown': {
-#             'attributes': {
-#                 'general': 'general_variable',
-#             },
-#             'commands': [
-#                 'echo $general 1b',
-#                 'echo $file 1b',
-#                 'echo $function 1b',
-#             ],
-#         }
-#     }
+    result = mainConfig1.getHooks()
+    assert result == DATA_CONFIG1
+    result3 = mainConfig3.getHooks()
+    assert result3 == DATA_FUNCTION_LAYER3
 
 
 def test_mainConfig_hooks_general_setup() -> None:

@@ -12,8 +12,8 @@ from rich import print
 from rich.progress import Progress
 from rich.traceback import install
 
-from config_parser import MainConfig, LangConfig, deep_merge
-from hook import Hook, HookType
+from config_parser import MainConfig, LangConfig
+from hook import Hook, HookType, deep_merge
 
 class LogLevel:
     def __init__(self, level: int = 0, prefix: str = "[]", color: str = "") -> None:
