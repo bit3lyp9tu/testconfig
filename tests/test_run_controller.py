@@ -3,10 +3,12 @@ import pytest
 
 from src.config_parser import *
 from src.file_builder import RunController, Writer
-from src.hook import HookType
+from src.hook import HookType, deep_merge
 
 
 test_runs1 = RunController("../tests/configs/config1.yaml", "../tests/configs/lang1")
+test_runs4 = RunController("../tests/configs/config4.yaml", "../tests/configs/lang4")
+
 def test_run_controller() -> None:
     """
     Basic test for RunController class
@@ -255,7 +257,6 @@ def test_strange_bug() -> None:
     """
 
     results = {}
-
     results["python/general_setup"] = test_runs4.getJoinedHook(HookType.GENERAL_SETUP, "python").toDict()
     results["python/file_setup"] = test_runs4.getJoinedHook(HookType.FILE_SETUP, "python").toDict()
     results["python/function_setup"] = test_runs4.getJoinedHook(HookType.FUNCTION_SETUP, "python").toDict()
@@ -270,6 +271,33 @@ def test_strange_bug() -> None:
     results["php/file_shutdown"] = test_runs4.getJoinedHook(HookType.FILE_SHUTDOWN, "php").toDict()
     results["php/general_shutdown"] = test_runs4.getJoinedHook(HookType.GENERAL_SHUTDOWN, "php").toDict()
 
-    # assert results == {
-
-    # }
+    assert results == {
+        'php/file_setup': {
+            # 'commands': [
+            #     'ls -a invalid_path',
+            # ],
+        },
+        'php/file_shutdown': {},
+        'php/function_setup': {},
+        'php/function_shutdown': {},
+        'php/general_setup': {
+            'commands': [
+                '$invalid_path',
+            ],
+        },
+        'php/general_shutdown': {},
+        'python/file_setup': {
+            'commands': [
+                'ls -a invalid_path',
+            ],
+        },
+        'python/file_shutdown': {},
+        'python/function_setup': {},
+        'python/function_shutdown': {},
+        'python/general_setup': {
+            'commands': [
+                '$invalid_path',
+            ],
+        },
+        'python/general_shutdown': {},
+    }

@@ -359,23 +359,68 @@ DATA_CONFIG1 = {
         }
     }
 
+DATA_CONFIG4 = {
+    'file_setup': {
+        'cpp': {},
+        'php': {
+            # 'commands': [
+            #     'ls -a invalid_path',
+            # ],
+        },
+        'python': {
+            'commands': [
+                'ls -a invalid_path',
+            ],
+        },
+    },
+    'file_shutdown': {
+        'cpp': {},
+        'php': {},
+        'python': {},
+    },
+    'function_setup': {
+        'cpp': {},
+        'php': {
+            'tests/code/test.php': {},
+        },
+        'python': {
+            'tests/code/test.py': {},
+        },
+    },
+    'function_shutdown': {
+        'cpp': {},
+        'php': {
+            'tests/code/test.php': {},
+        },
+        'python': {
+            'tests/code/test.py': {},
+        },
+    },
+    'general_setup': {
+        'commands': [
+            '$invalid_path',
+        ],
+    },
+    'general_shutdown': {},
+}
+
 def test_mainConfig_hooks_all() -> None:
     """
     Test if hooks getter returns all hooks from config file
     """
-    mainConfig4 = MainConfig("../tests/configs/config3.yaml")
+    mainConfig3 = MainConfig("../tests/configs/config3.yaml")
 
     general_layer = GeneralLayer(
-        mainConfig4.getHookGeneral(HookType.GENERAL_SETUP),
-        mainConfig4.getHookGeneral(HookType.GENERAL_SHUTDOWN)
+        mainConfig3.getHookGeneral(HookType.GENERAL_SETUP),
+        mainConfig3.getHookGeneral(HookType.GENERAL_SHUTDOWN)
     )
     assert general_layer.toData() == DATA_GENERAL_LAYER3
 
     file_layer = FileLayer(
         general_layer,
         "python",
-        mainConfig4.getHookFile(HookType.FILE_SETUP, "python"),
-        mainConfig4.getHookFile(HookType.FILE_SHUTDOWN, "python")
+        mainConfig3.getHookFile(HookType.FILE_SETUP, "python"),
+        mainConfig3.getHookFile(HookType.FILE_SHUTDOWN, "python")
     )
     assert file_layer.toData() == DATA_FILE_LAYER3
 
@@ -383,17 +428,19 @@ def test_mainConfig_hooks_all() -> None:
         file_layer,
         "python",
         "tests/code/test.py",
-        mainConfig4.getHookFunction(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"),
-        mainConfig4.getHookFunction(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py")
+        mainConfig3.getHookFunction(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"),
+        mainConfig3.getHookFunction(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py")
     )
     assert function_layer.toData() == DATA_FUNCTION_LAYER3
+
+    mainConfig4 = MainConfig("../tests/configs/config4.yaml")
+    assert mainConfig4.getHooks() == DATA_CONFIG4
 
 
 def test_mainConfig_hook_layers_in_loop() -> None:
     """
     Test hook layers in loop
     """
-    result: dict = defaultdict(dict)
 
     general_layer = GeneralLayer(
         mainConfig1.getHookGeneral(HookType.GENERAL_SETUP),
@@ -411,16 +458,16 @@ def test_mainConfig_hook_layers_in_loop() -> None:
             )
 
             for script in mainConfig1.getScripts(language):
-                    if script in mainConfig1.content[language] and mainConfig1.content[language][script] != None:
+                if script in mainConfig1.content[language] and mainConfig1.content[language][script] != None:
 
-                        function_layer = FunctionLayer(
-                            file_layer,
-                            language,
-                            script,
-                            mainConfig1.getHookFunction(HookType.FUNCTION_SETUP, language, script),
-                            mainConfig1.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script)
-                        )
-                        file_layer.merge(function_layer.toData())
+                    function_layer = FunctionLayer(
+                        file_layer,
+                        language,
+                        script,
+                        mainConfig1.getHookFunction(HookType.FUNCTION_SETUP, language, script),
+                        mainConfig1.getHookFunction(HookType.FUNCTION_SHUTDOWN, language, script)
+                    )
+                    file_layer.merge(function_layer.toData())
             general_layer.merge(file_layer.toData())
 
         else:

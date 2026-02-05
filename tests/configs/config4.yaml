@@ -22,6 +22,9 @@ python:
                 csv_path: 'tests/data/test.csv'
     file_shutdown:
 php:
+    file_setup:
+        # commands:
+        #     - "ls -a invalid_path"
     tests/code/test.php:
         function_setup:
         function_shutdown:

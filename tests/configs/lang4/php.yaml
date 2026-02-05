@@ -33,10 +33,10 @@ unit-test:
           - "?>"
 hooks:
     general_setup:
-        commands:
-            - "ls -a invalid_path"
     general_shutdown:
     file_setup:
+        # commands:
+        #     - "ls -a invalid_path"
     file_shutdown:
     function_setup:
     function_shutdown:
