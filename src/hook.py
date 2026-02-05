@@ -95,23 +95,10 @@ class Layer:
         self.data: dict = defaultdict(dict)
 
     def finalize(self) -> None:
-        if "general_setup" not in self.data:
-            self.data["general_setup"] = {}
-
-        if "general_shutdown" not in self.data:
-            self.data["general_shutdown"] = {}
-
-        if "file_setup" not in self.data:
-            self.data["file_setup"] = {}
-
-        if "file_shutdown" not in self.data:
-            self.data["file_shutdown"] = {}
-
-        if "function_setup" not in self.data:
-            self.data["function_setup"] = {}
-
-        if "function_shutdown" not in self.data:
-            self.data["function_shutdown"] = {}
+        for member in HookType.__members__:
+            hook_name = member.lower()
+            if hook_name != "none" and hook_name not in self.data:
+                self.data[hook_name] = {}
 
     def merge(self, data: dict) -> None:
         self.data = deep_merge(self.data, data)
@@ -120,8 +107,12 @@ class Layer:
         self.finalize()
         return to_dict(self.data)
 
-    # def __getitem__(self, key):
-    #     return self.data[key]
+    def updateData(self, data, *keys) -> None:
+        d = self.data
+        for key in keys[:-1]:
+            d = d.setdefault(key, {})
+        d[keys[-1]] = data
+
 
 class GeneralLayer(Layer):
     def __init__(self, setup: Hook, shutdown: Hook) -> None:
@@ -133,8 +124,9 @@ class GeneralLayer(Layer):
 
         self.general_shutdown.attributes.update(setup.attributes)
 
-        self.data["general_setup"] = self.general_setup.toDict()
-        self.data["general_shutdown"] = self.general_shutdown.toDict()
+        self.updateData(self.general_setup.toDict(), "general_setup")
+        self.updateData(self.general_shutdown.toDict(), "general_shutdown")
+
 
 class FileLayer(GeneralLayer):
     def __init__(self, general_layer: GeneralLayer, language: str, setup: Hook, shutdown: Hook) -> None:
@@ -149,8 +141,8 @@ class FileLayer(GeneralLayer):
         self.file_shutdown: Hook = shutdown
         self.file_shutdown.attributes.update(self.file_setup.attributes)
 
-        self.data["file_setup"][language] = self.file_setup.toDict()
-        self.data["file_shutdown"][language] = self.file_shutdown.toDict()
+        self.updateData(self.file_setup.toDict(), "file_setup", language)
+        self.updateData(self.file_shutdown.toDict(), "file_shutdown", language)
 
 
 class FunctionLayer(FileLayer):
@@ -168,6 +160,6 @@ class FunctionLayer(FileLayer):
         self.function_shutdown: Hook = shutdown
         self.function_shutdown.attributes.update(self.function_setup.attributes)
 
-        self.data.setdefault("function_setup", {}).setdefault(language, {})[file] = self.function_setup.toDict()
-        self.data.setdefault("function_shutdown", {}).setdefault(language, {})[file] = self.function_shutdown.toDict()
+        self.updateData(self.function_setup.toDict(), "function_setup", language, file)
+        self.updateData(self.function_shutdown.toDict(), "function_shutdown", language, file)
 

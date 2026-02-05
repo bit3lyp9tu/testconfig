@@ -1,10 +1,10 @@
 general_setup:
-    # commands:
-    #     - "$invalid_path"
+    commands:
+        - "$invalid_path"
 python:
     file_setup:
-        # commands:
-        #     - "ls -a invalid_path"
+        commands:
+            - "ls -a invalid_path"
     tests/code/test.py:
         function_setup:
         function_shutdown:
