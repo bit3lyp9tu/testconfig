@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from config_parser import MainConfig, LangConfig
-from file_builder import Writer, Script
+from file_builder import Writer, Script, CommandRunner
 from hook import Hook, HookType
 from layer import deep_merge
 from log_level import LogLevels
@@ -81,7 +81,7 @@ class RunController:
         msg = f"[Hook] [dark_magenta]{path}:[/dark_magenta] load {hook_name}..."
         output_stream.append(msg)
         self.LOGS.print(1, msg)
-        out_lang, err_code = Writer.runHook(hook)
+        out_lang, err_code = CommandRunner.runHook(hook)
         if err_code != 0:
             self.LOGS.print(3, f"[dark_magenta]{path}.{hook_name.replace(" ", "_")}:[/dark_magenta] [bright_red]" + "".join(out_lang) + "[/bright_red]")
         output_stream.extend(out_lang)
@@ -122,7 +122,7 @@ class RunController:
                 msg = f"[File Manager] execute script file [{generated_file_name}]..."
                 output.append(msg)
                 self.LOGS.print(1, msg)
-                script_result, exit_code = Writer.runCommand(self.langConfigs[path].getExecutionCommand(generated_file_name))
+                script_result, exit_code = CommandRunner.runCommand(self.langConfigs[path].getExecutionCommand(generated_file_name))
                 output.extend(script_result)
                 if exit_code != 0:
                     msg = f"[yellow1][Test] Test in [./{generated_file_name}] failed! (Exit code: {exit_code}) [/yellow1]"

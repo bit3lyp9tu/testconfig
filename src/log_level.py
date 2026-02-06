@@ -1,3 +1,5 @@
+from rich import print
+
 
 class LogLevel:
     def __init__(self, level: int = 0, prefix: str = "[]", color: str = "") -> None:

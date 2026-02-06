@@ -5,7 +5,6 @@ import subprocess
 
 from contextlib import contextmanager
 
-from rich import print
 from rich.progress import Progress
 from rich.traceback import install
 
@@ -151,6 +150,8 @@ class Writer:
                     print(line)
                 f.writelines(line + "\n")
 
+
+class CommandRunner:
     @classmethod
     def runCommand(cls, command: str, env_vars: dict = {}) -> tuple[list[str], int]:
         if command == "":

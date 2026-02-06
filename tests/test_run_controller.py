@@ -2,7 +2,7 @@ import mypy
 import pytest
 
 from src.config_parser import MainConfig, LangConfig
-from src.file_builder import Writer
+from src.file_builder import Writer, CommandRunner
 from src.run_controller import RunController
 from src.hook import HookType
 
@@ -28,7 +28,7 @@ def test_run_controller_run_hook() -> None:
     """
     Test specific hook command
     """
-    out_lang, err_code = Writer.runHook(test_runs1.getJoinedHook(HookType.FILE_SETUP, "python"))
+    out_lang, err_code = CommandRunner.runHook(test_runs1.getJoinedHook(HookType.FILE_SETUP, "python"))
     assert out_lang == [
         "OVERRIDDEN"
     ]
@@ -145,37 +145,37 @@ def test_run_controller_check_environment_scope() -> None:
     Test if scope of environmental variables is correct
     """
 
-    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.GENERAL_SETUP, "python"))
+    out_file, _ = CommandRunner.runHook(test_runs3.getJoinedHook(HookType.GENERAL_SETUP, "python"))
     assert out_file == [
         "general_variable 1",
         "Missing environment variable: [$file]",
         "Missing environment variable: [$function]",
     ]
-    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FILE_SETUP, "python"))
+    out_file, _ = CommandRunner.runHook(test_runs3.getJoinedHook(HookType.FILE_SETUP, "python"))
     assert out_file == [
         "general_variable 2",
         "file_variable 2",
         "Missing environment variable: [$function]",
     ]
-    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"))
+    out_file, _ = CommandRunner.runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SETUP, "python", "tests/code/test.py"))
     assert out_file == [
         "general_variable 3",
         "file_variable 3",
         "function_variable 3"
     ]
-    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py"))
+    out_file, _ = CommandRunner.runHook(test_runs3.getJoinedHook(HookType.FUNCTION_SHUTDOWN, "python", "tests/code/test.py"))
     assert out_file == [
         "general_variable 3b",
         "file_variable 3b",
         "function_variable 3b"
     ]
-    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.FILE_SHUTDOWN, "python"))
+    out_file, _ = CommandRunner.runHook(test_runs3.getJoinedHook(HookType.FILE_SHUTDOWN, "python"))
     assert out_file == [
         "general_variable 2b",
         "file_variable 2b",
         "Missing environment variable: [$function]",
     ]
-    out_file, _ = Writer.runHook(test_runs3.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python"))
+    out_file, _ = CommandRunner.runHook(test_runs3.getJoinedHook(HookType.GENERAL_SHUTDOWN, "python"))
     assert out_file == [
         "general_variable 1b",
         "Missing environment variable: [$file]",
