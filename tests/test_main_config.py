@@ -8,7 +8,8 @@ from pathlib import Path
 from collections import defaultdict
 
 from src.config_parser import MainConfig
-from src.hook import HookType, GeneralLayer, FileLayer, FunctionLayer, to_dict
+from src.hook import HookType
+from src.layer import GeneralLayer, FileLayer, FunctionLayer, to_dict
 
 
 mainConfig1: MainConfig = MainConfig("../tests/configs/config1.yaml")

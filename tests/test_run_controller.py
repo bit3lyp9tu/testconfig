@@ -1,9 +1,10 @@
 import mypy
 import pytest
 
-from src.config_parser import *
-from src.file_builder import RunController, Writer
-from src.hook import HookType, deep_merge
+from src.config_parser import MainConfig, LangConfig
+from src.file_builder import Writer
+from src.run_controller import RunController
+from src.hook import HookType
 
 
 test_runs1 = RunController("../tests/configs/config1.yaml", "../tests/configs/lang1")

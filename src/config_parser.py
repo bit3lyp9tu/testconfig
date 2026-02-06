@@ -3,14 +3,13 @@ import re
 
 import mypy
 
-from pathlib import Path
-
-from collections import defaultdict
-
 import csv
 import yaml
 
-from hook import Hook, HookType, GeneralLayer, FileLayer, FunctionLayer, to_dict
+from pathlib import Path
+
+from hook import Hook, HookType
+from layer import GeneralLayer, FileLayer, FunctionLayer, to_dict
 
 
 class MainConfig:
