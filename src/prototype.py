@@ -37,7 +37,7 @@ LOGS = LogLevels(
     LogLevel(1, "[INFO]", "dodger_blue2"),
     LogLevel(2, "[WARN]", "yellow1"),
     LogLevel(3, "[ERROR]", "bright_red"),
-    LogLevel(4, "[FATAL]", "rosy_brown")
+    LogLevel(4, "[FATAL]", "black on red")
 )
 
 try:

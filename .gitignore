@@ -16,3 +16,6 @@ tests/demo_file.*
 
 todo.md
 **/*.pyc
+
+*.dot
+*.svg
