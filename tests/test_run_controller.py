@@ -42,6 +42,65 @@ def test_run_controller() -> None:
         "hooks": None
     }
 
+def test_run_command() -> None:
+    """
+    Test running basic command.
+    """
+    assert CommandRunner.runCommand("ls") == ([
+        'classes.dot',
+        'classes_src.dot',
+        'env',
+        'packages.dot',
+        'packages_src.dot',
+        'packages.svg',
+        'pytest.ini',
+        'README.md',
+        'run.sh',
+        'src',
+        'test_report.txt',
+        'tests',
+        'tips.md',
+        'todo.md',
+        '',
+    ], 0)
+
+def test_run_command_failure() -> None:
+    """
+    Test running command that fails.
+    """
+    assert CommandRunner.runCommand("ls file_that_does_not_exist.txt") == (
+        [
+            "ls: cannot access 'file_that_does_not_exist.txt': No such file or directory",
+            ""
+        ],
+        2
+    )
+
+def test_run_command_globbing() -> None:
+    """
+    Test running command with globbing.
+    """
+    assert CommandRunner.runCommand("ls tests/*.py") == ([
+        "tests/test_code_builder.py",
+        "tests/test_hook.py",
+        "tests/test_lang_config.py",
+        "tests/test_main_config.py",
+        "tests/test_run_controller.py",
+        "tests/test_script_bilder.py",
+        ""
+    ], 0)
+
+def test_run_command_piping() -> None:
+    """
+    Test running command with piping.
+    """
+    assert CommandRunner.runCommand("ls tests | awk -e '/config/'") == ([
+        "configs",
+        "test_lang_config.py",
+        "test_main_config.py",
+        ""
+    ], 0)
+
 def test_run_controller_run_hook() -> None:
     """
     Test specific hook command

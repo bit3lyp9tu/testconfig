@@ -58,7 +58,8 @@ def test_run_command_executor_with_error() -> None:
     ], 1)
 
     assert CommandRunner.runCommand("sjdjhgdhjdjdfjfd") == ([
-        "[Errno 2] No such file or directory: 'sjdjhgdhjdjdfjfd'"
+        "/bin/sh: 1: sjdjhgdhjdjdfjfd: not found",
+        ""
     ], 127)
 
 def test_run_hook_command() -> None:

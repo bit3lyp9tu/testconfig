@@ -153,7 +153,6 @@ class Writer:
 
 class CommandRunner:
 
-    # TODO: does not support piping, globbing (use shell=True)
     @classmethod
     def runCommand(cls, command: str, env_vars: dict = {}) -> tuple[list[str], int]:
         if command == "":
@@ -170,7 +169,7 @@ class CommandRunner:
             expanded = os.path.expandvars(command)
 
         try:
-            process = subprocess.run(expanded.split(), capture_output=True, text=True, check=True, env=env)
+            process = subprocess.run(expanded, capture_output=True, text=True, check=True, shell=True, env=env)
             return process.stdout.split("\n"), process.returncode
 
         except subprocess.CalledProcessError as e:
