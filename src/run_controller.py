@@ -92,6 +92,8 @@ class RunController:
     def start(self, directory: str, keep_scripts: bool = True) -> list[str]:
         output: list[str] = []
 
+        demo_file_name = "demo_file"
+
         used_general_config_language = "python" # TODO: implement logic to determine which language to use
 
         output.extend(self._hook_block(self.getJoinedHook(HookType.GENERAL_SETUP, used_general_config_language), "/", output))
@@ -110,7 +112,7 @@ class RunController:
                 output.extend(self._hook_block(self.getJoinedHook(HookType.FUNCTION_SETUP, language_name, file), f"/{language_name}/({file})/", output))
 
                 #   write script file
-                generated_file_name = f"{directory}/demo_file.{file.split(".")[-1]}"
+                generated_file_name = f"{directory}/{demo_file_name}.{file.split(".")[-1]}"
                 code_lines = Script(self.mainConfig, self.langConfigs[f"{self.lang_path}/{language_name}.yaml"])
 
                 msg = f"[File Manager] generate script file [{generated_file_name}]..."
@@ -130,10 +132,16 @@ class RunController:
                     self.LOGS.print(2, msg)
 
                 #   delete script file
-                # if keep_scripts == False:
-                #     script_result, exit_code = Writer.runCommand(f"rm {generated_file_name}")
-                #     if script_result[-1] != "":
-                #         output.extend(script_result)
+                if keep_scripts == False:
+                    Path(f"./{generated_file_name}").unlink()
+                    if exit_code == 0:
+                        delete_msg = f"[File Manager] File: '{generated_file_name}' deleted"
+                        output.extend(delete_msg)
+                        self.LOGS.print(1, delete_msg)
+                    else:
+                        delete_msg = f"[yellow1][File Manager] Failed to delete [./{generated_file_name}] failed! (Exit code: {exit_code}) [/yellow1]"
+                        output.extend(delete_msg)
+                        self.LOGS.print(2, delete_msg)
 
                 output.extend(self._hook_block(self.getJoinedHook(HookType.FUNCTION_SHUTDOWN, language_name, file), f"/{language_name}/({file})/", output))
 

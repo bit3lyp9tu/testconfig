@@ -42,3 +42,5 @@ php:
                 csv_path: 'tests/data/test.csv'
 cpp:
 general_shutdown:
+    # commands:
+    #     - "rm ./tests/demo_file.py"

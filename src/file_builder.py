@@ -152,6 +152,8 @@ class Writer:
 
 
 class CommandRunner:
+
+    # TODO: does not support piping, globbing (use shell=True)
     @classmethod
     def runCommand(cls, command: str, env_vars: dict = {}) -> tuple[list[str], int]:
         if command == "":

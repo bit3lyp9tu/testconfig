@@ -1,10 +1,28 @@
+import glob
+import os
+
+from pathlib import Path
+import subprocess
 import mypy
 import pytest
 
 from src.config_parser import MainConfig, LangConfig
 from src.file_builder import Writer, CommandRunner
+from src.log_level import LogLevels
 from src.run_controller import RunController
 from src.hook import HookType
+
+
+@pytest.fixture(autouse=True, scope='session')
+def my_fixture():
+    # setup_stuff
+    for f in glob.glob("./tests/demo_file.*"):
+        Path(f).unlink()
+
+    yield
+    # teardown_stuff
+    for f in glob.glob("./tests/demo_file.*"):
+        Path(f).unlink()
 
 
 test_runs1 = RunController("../tests/configs/config1.yaml", "../tests/configs/lang1")
@@ -302,3 +320,46 @@ def test_strange_bug() -> None:
         },
         'python/general_shutdown': {},
     }
+
+def test_delete_temp_file() -> None:
+    """
+    Test if the automatic delete option for temporary files works.
+    """
+
+    temp_file_path = "tests"
+    temp_file_name_infix = "demo_file"
+
+    # delete file
+    tester = RunController(
+        "../tests/configs/config4.yaml",
+        "../tests/configs/lang4",
+        LogLevels()
+    )
+    Writer(
+        tester.start(
+            temp_file_path,
+            False
+        )
+    ).write("test_report.txt", False)
+
+    files = {f for f in os.listdir(temp_file_path) if temp_file_name_infix in f}
+    assert files == set({})
+
+    # do not delete file
+    tester = RunController(
+        "../tests/configs/config4.yaml",
+        "../tests/configs/lang4",
+        LogLevels()
+    )
+    Writer(
+        tester.start(
+            temp_file_path,
+            True
+        )
+    ).write("test_report.txt", False)
+    files = {f for f in os.listdir(temp_file_path) if temp_file_name_infix in f}
+    assert files == set({
+        "demo_file.py",
+        "demo_file.php"
+    })
+
