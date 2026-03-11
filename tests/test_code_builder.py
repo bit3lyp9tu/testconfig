@@ -42,6 +42,16 @@ def test_build_function_body() -> None:
         "\tsys.exit(1)"
     ]
 
+def test_build_function_custom() -> None:
+    """
+    Test custom function getter
+    """
+
+    result = cb.getFunctionCustom([1,2,3,4,5,6], [21], "addAll(x_n)==y_n")
+    assert result == [
+        "\taddAll(1,2,3,4,5,6)==21"
+    ]
+
 def test_build_function() -> None:
     """
     Test function getter
@@ -53,6 +63,8 @@ def test_build_function() -> None:
         "\tsys.exit(1)",
         ""
     ]
+    # result = cb.getFunction("python", "addAll", [])
+
 
 def test_build_all_tests_of_function() -> None:
     """
