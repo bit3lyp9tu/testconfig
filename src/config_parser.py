@@ -121,11 +121,6 @@ class MainConfig:
             if self.isPointingToCsvFile(lang, script_path, function):
                 with open(path, 'r') as file:
                     lines = csv.reader(file, delimiter=';')
-                    # TODO
-                    # has_syntax_option = "syntax" in list(lines)[0]
-                    # if has_syntax_option:
-                    #     pass
-                    # else:
                     for param in list(lines)[1:]:
                         if param[0] == function:
                             x2_n: list[int | float | str] = self._typifyTestCaseToList(param[1].replace("[", "").replace("]", ""))
