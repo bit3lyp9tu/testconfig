@@ -112,7 +112,7 @@ class MainConfig:
                     results.append((x_n, y_n))
         else:
             # use structure from code file
-            code_file: str = body["code_file"]
+            # code_file: str = body["code_file"]
             # check if code_file is valid file in prog language and exists
             # append import (from import references in config)
 
