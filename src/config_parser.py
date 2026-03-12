@@ -111,6 +111,11 @@ class MainConfig:
 
                     results.append((x_n, y_n))
         else:
+            # use structure from code file
+            code_file: str = body["code_file"]
+            # check if code_file is valid file in prog language and exists
+            # append import (from import references in config)
+
             # use data from csv file
             path: str = body["csv_path"]
             if self.isPointingToCsvFile(lang, script_path, function):
