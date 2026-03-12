@@ -53,6 +53,15 @@ class Script:
         )
         return test_header
 
+    def getFunctionCustom(self, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str) -> str:
+        return f"{custom_syntax.replace(
+            'x_n',
+            ','.join(str(x) for x in parameters)
+        ).replace(
+            'y_n',
+            ','.join(str(x) for x in expected_result)
+        )}"
+
     def getFunctionBody(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float]) -> list[str]:
         result: list[str] = []
 
@@ -80,23 +89,16 @@ class Script:
 
         return result
 
-    def getFunctionCustom(self, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str) -> list[str]:
-        return [f"\t{custom_syntax.replace(
-            "x_n",
-            ",".join(str(x) for x in parameters)
-        ).replace(
-            "y_n",
-            ",".join(str(x) for x in expected_result)
-        )}"]
-
-    def getFunction(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], has_syntax_options: bool = False, custom_syntax: str = "") -> list[str]:
+    def getFunction(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str = "") -> list[str]:
         result: list[str] = []
 
-        result.append(self.getFunctionHead(language, function_name, parameters, expected_result))
-        if not has_syntax_options:
-            result.extend(self.getFunctionBody(language, function_name, parameters, expected_result))
-        else:
-            result.extend(self.getFunctionCustom(parameters, expected_result, custom_syntax))
+        function_head = self.getFunctionHead(language, function_name, parameters, expected_result)
+
+        if custom_syntax != "":
+            function_head = self.getFunctionCustom(parameters, expected_result, custom_syntax)
+
+        result.append(function_head)
+        result.extend(self.getFunctionBody(language, function_name, parameters, expected_result))
         result.append("")
 
         return result
