@@ -127,10 +127,11 @@ class MainConfig:
                     #     pass
                     # else:
                     for param in list(lines)[1:]:
-                        x2_n: list[int | float | str] = self._typifyTestCaseToList(param[1].replace("[", "").replace("]", ""))
-                        y2_n: list[int | float | str] = self._typifyTestCaseToList(param[2].replace("[", "").replace("]", ""))
+                        if param[0] == function:
+                            x2_n: list[int | float | str] = self._typifyTestCaseToList(param[1].replace("[", "").replace("]", ""))
+                            y2_n: list[int | float | str] = self._typifyTestCaseToList(param[2].replace("[", "").replace("]", ""))
 
-                        results.append((x2_n, y2_n))
+                            results.append((x2_n, y2_n))
 
         return results
 
