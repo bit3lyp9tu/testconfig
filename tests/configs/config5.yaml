@@ -25,7 +25,7 @@ python:
                 - 10,5 -> 5
             multiply:
                 csv_path: 'tests/data/test.csv'
-            complicated:
+            addAll:
                 csv_path: 'tests/data/complex_data.csv'
                 code_file: 'tests/config/config5.py'
     file_shutdown:

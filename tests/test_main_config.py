@@ -140,6 +140,12 @@ def test_mainConfig_content_functions_content_data_list() -> None:
         ([0.5,10.0,-1.0], [-5.0])
     ]
 
+    mainConfig5: MainConfig = MainConfig("../tests/configs/config5.yaml")
+    result5 = mainConfig5.getTestData("python", "tests/code/test.py", "addAll")
+    assert result5 == [
+        ([1,2,3,4,5,6], [21])
+    ]
+
 DATA_GENERAL_LAYER3 = {
     'general_setup': {
         'attributes': {

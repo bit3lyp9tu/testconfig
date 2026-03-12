@@ -68,6 +68,7 @@ def test_build_function() -> None:
         ""
     ]
 
+cb5 = Script(MainConfig("../tests/configs/config5.yaml"), LangConfig( "../tests/configs/lang4/python.yaml"))
 
 def test_build_all_tests_of_function() -> None:
     """
@@ -79,6 +80,13 @@ def test_build_all_tests_of_function() -> None:
         "\tprint('[FAIL] tests/code/test.py#subtract(10,5) != 5')",
         "\tsys.exit(1)",
         ""
+    ]
+    result5 = cb5.getAllTestsOfFunction("python", "addAll")
+    assert result5 == [
+        'if test_module.addAll(1,2,3,4,5,6) != 21:',
+        "\tprint('[FAIL] tests/code/test.py#addAll(1,2,3,4,5,6) != 21')",
+        '\tsys.exit(1)',
+        ''
     ]
 
 def test_build_all_tests_python() -> None:
