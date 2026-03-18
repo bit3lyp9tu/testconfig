@@ -19,6 +19,7 @@ unit-test:
             - 'import importlib.util'
             - ''
             - 'ROOT = Path(__file__).resolve().parents[1]'
+            - 'sys.path.insert(0, str(ROOT))'
         import_head:
             - 'spec = importlib.util.spec_from_file_location("%module_name%", ROOT / "%file_path%")'
             - '%module_name% = importlib.util.module_from_spec(spec) # type: ignore'

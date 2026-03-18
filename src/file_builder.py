@@ -10,8 +10,8 @@ from contextlib import contextmanager
 from rich.progress import Progress
 from rich.traceback import install
 
-from config_parser import MainConfig, LangConfig
-from hook import Hook
+from .config_parser import MainConfig, LangConfig
+from .hook import Hook
 
 class Script:
     def __init__(self, config: MainConfig, lang_config: LangConfig) -> None:

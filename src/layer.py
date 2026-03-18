@@ -2,7 +2,7 @@ import mypy
 
 from collections import defaultdict
 
-from hook import HookType, Hook
+from .hook import HookType, Hook
 
 
 def to_dict(d):

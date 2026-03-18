@@ -2,11 +2,11 @@ import os
 
 from pathlib import Path
 
-from config_parser import MainConfig, LangConfig
-from file_builder import Writer, Script, CommandRunner
-from hook import Hook, HookType
-from layer import deep_merge
-from log_level import LogLevels
+from .config_parser import MainConfig, LangConfig
+from .file_builder import Writer, Script, CommandRunner
+from .hook import Hook, HookType
+from .layer import deep_merge
+from .log_level import LogLevels
 
 class RunController:
     def __init__(self, config_path: str, lang_path: str, logs: LogLevels = LogLevels(0)) -> None:

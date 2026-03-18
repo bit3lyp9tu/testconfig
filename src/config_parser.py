@@ -8,8 +8,8 @@ import yaml
 
 from pathlib import Path
 
-from hook import Hook, HookType
-from layer import GeneralLayer, FileLayer, FunctionLayer, to_dict
+from .hook import Hook, HookType
+from .layer import GeneralLayer, FileLayer, FunctionLayer, to_dict
 
 
 class MainConfig:
