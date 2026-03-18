@@ -108,6 +108,7 @@ class Script:
             code_file = script_path
 
         variable: str = f"VAR_{self.hash_string(code_file)}"
+        # TODO: check if hash already exist in code-file --> if yes, concatenate recursively additional hashes
         function_module = variable
 
         if self.mainConfig._isCodeFileValid(script_path, code_file):
