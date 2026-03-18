@@ -104,3 +104,21 @@ wenn du eh strings für massen-tests benutzt kannste auch statt da input und out
 
 wäre cool wenn man auch neue flags hinzufügen könnte, sowas wie check_exit_code_only: bash irgendwas.sh, was dann stdout usw alles ignoriert und nur den exit-code zurückgibt, und die config was da gemacht wrird iwie in check_exit_code_only.yaml oder so läge. damit wär man komplett flexibel und erweiterbar. genauso wie man da ne playwright.yaml haben könnte die n browser startet und js ausführt und den return code zurückgibt oder sowas. paar defaults (python, php, playwright usw.) kannste mitliefern per default, wer mehr will muss sie selbst schreiben
 und du könntest direkt das programm selbst damit testen, und den poster generator, damit du direkt n bsp hast wo du siehst wie mans noch verbessern kann und auch das andere projekt einbeziehst
+
+```python
+if test_module.multiply(0.5,10,-1) != -5.0:
+	print('[FAIL] tests/code/test.py#multiply(0.5,10,-1) != -5.0')
+	sys.exit(1)
+
+if test_module.addAll(1,2,3,4,5,6) != 21:
+	print('[FAIL] tests/code/test.py#addAll(1,2,3,4,5,6) != 21')
+	sys.exit(1)
+
+spec = importlib.util.spec_from_file_location("test_module2", ROOT / "tests/configs/config5.py")
+test_module2 = importlib.util.module_from_spec(spec) # type: ignore
+spec.loader.exec_module(test_module2) # type: ignore
+
+if test_module2.complex_test() != :
+	print('[FAIL] tests/code/test.py#complex_test() != ')
+	sys.exit(1)
+```

@@ -22,7 +22,10 @@ class MainConfig:
         with open(abs_file_path, 'r') as file:
             self.content = yaml.safe_load(file)
 
-        self.attributes: dict[str, dict[str, str]] = {} # global/local variables?
+        # TODO: needs testing
+        self.custom_module_variables: dict[str, list[str]] = {
+            language: [] for language in self.getLanguages()
+        }
 
     def getLanguages(self) -> list[str]:
         return sorted(self.content.keys() - {
@@ -57,6 +60,17 @@ class MainConfig:
             return {}
         return self.content[lang][script_path]["tests"]
 
+    def _getCodeFile(self, lang: str, script_path: str, function: str) -> str:
+        test_content: dict = self.getFunctionsBody(lang, script_path)
+
+        function_content = test_content.get(function, "")
+        if function_content == "":
+            return ""
+
+        if "code_file" in function_content and function_content["code_file"] != None:
+            return function_content["code_file"]
+
+        return ""
 
     def getFunction(self, lang: str, script_path: str, function: str) -> list[str]:
         function_content: dict[str, list[str] | dict[str, str]] = self.getFunctionsBody(lang, script_path)
@@ -69,6 +83,8 @@ class MainConfig:
 
         return list(function_content[function])
 
+    def _hasCodeFile(self, language: str, script_path: str, function: str) -> bool:
+        return self._getCodeFile(language, script_path, function) != ""
 
     def isPointingToCsvFile(self, lang: str, script_path: str, function: str) -> bool:
         function_content: dict[str, dict[str, str]] = self.getFunctionsBody(lang, script_path)
@@ -82,6 +98,8 @@ class MainConfig:
         path: str = function_content[function]["csv_path"]
         return path.endswith(".csv") and Path(path).is_file()
 
+    def _isCodeFileValid(self, script_path: str, file: str) -> bool:
+        return script_path.split(".")[-1] == file.split(".")[-1] and Path(file).is_file()
 
     def _typifyTestCaseToList(self, testCaseParameters: str) -> list[int | float | str]:
         typified_parameters: list[int | float | str] = []
@@ -95,6 +113,21 @@ class MainConfig:
             else:
                 typified_parameters.append(parameter)
         return typified_parameters
+
+    # TODO: needs testing
+    def hasCustomVariable(self, language: str, variable: str) -> bool:
+        # return language in self.custom_module_variables.keys() and variable in self.custom_module_variables[language]
+        return variable in self.custom_module_variables.get(language, [])
+
+    # TODO: needs testing
+    def addCustomVariable(self, language: str, variable: str) -> None:
+        self.custom_module_variables[language].append(variable)
+
+    # TODO: needs testing
+    def clearAllCustomVariables(self) -> None:
+        for lang in self.custom_module_variables.keys():
+            self.custom_module_variables[lang].clear()
+        # self.custom_module_variables = {langs: [] for langs in self.custom_module_variables.keys()}
 
     def getTestData(self, lang: str, script_path: str, function: str) -> list[tuple[list[int | float | str], list[int | float | str]]]:
         results: list[tuple[list[int | float | str], list[int | float | str]]] = []
@@ -111,11 +144,6 @@ class MainConfig:
 
                     results.append((x_n, y_n))
         else:
-            # use structure from code file
-            # code_file: str = body["code_file"]
-            # check if code_file is valid file in prog language and exists
-            # append import (from import references in config)
-
             # use data from csv file
             path: str = body["csv_path"]
             if self.isPointingToCsvFile(lang, script_path, function):
@@ -205,23 +233,57 @@ class LangConfig:
     def getVariables(self) -> dict[str, str]:
         return self.content["config"]["variables"]
 
-    def getHeaderData(self) -> list[str]:
+    # TODO: needs testing
+    def getVariable(self, key: str) -> str:
+        variable: dict = self.getVariables()
+
+        if key in variable and variable[key] != None:
+            return variable[key]
+        else:
+            raise Exception(f"Parameter {self.path}#config.variables.{key} does not exist")
+
+    def getSyntaxScheme(self) -> dict:
         if "unit-test" not in self.content or self.content["unit-test"] == None:
-            return []
+            return {}
         if "syntax_scheme" not in self.content["unit-test"] or self.content["unit-test"]["syntax_scheme"] == None:
+            return {}
+        return self.content["unit-test"]["syntax_scheme"]
+
+    def getHeaderData(self) -> list[str]:
+        content: dict = self.getSyntaxScheme()
+        if "header_data" not in content.keys() or content["header_data"] == None:
             return []
-        if "header_data" not in self.content["unit-test"]["syntax_scheme"]:
+        return content["header_data"]
+
+    def getImportHead(self) -> list[str]:
+        content: dict = self.getSyntaxScheme()
+        if "import_head" not in content.keys() or content["import_head"] == None:
             return []
-        return self.content["unit-test"]["syntax_scheme"]["header_data"]
+        return content["import_head"]
+
+    def getModifiedImportHead(self, file_path: str, module_name: str) -> list[str]:
+        result: list[str] = []
+
+        mask_file_path = self.content["config"]["variables"].get("file_path", "")
+        mask_module_name = self.content["config"]["variables"].get("module_name", "")
+
+        for line in self.getImportHead():
+            result.append(
+                line.replace(
+                    mask_file_path,
+                    file_path
+                ).replace(
+                    mask_module_name,
+                    module_name
+                )
+            )
+        return result
 
     def getFooterData(self) -> list[str]:
-        if "unit-test" not in self.content or self.content["unit-test"] == None:
+        content: dict = self.getSyntaxScheme()
+        if "footer_data" not in content:
             return []
-        if "syntax_scheme" not in self.content["unit-test"] or self.content["unit-test"]["syntax_scheme"] == None:
-            return []
-        if "footer_data" not in self.content["unit-test"]["syntax_scheme"]:
-            return []
-        return self.content["unit-test"]["syntax_scheme"]["footer_data"]
+        return content["footer_data"]
 
     def getTestSyntaxScheme(self) -> dict[str, str]:
         return {

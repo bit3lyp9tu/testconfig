@@ -16,6 +16,8 @@ mainConfig1: MainConfig = MainConfig("../tests/configs/config1.yaml")
 mainConfig2: MainConfig = MainConfig("../tests/configs/config2.yaml")
 mainConfig3: MainConfig = MainConfig("../tests/configs/config3.yaml")
 
+mainConfig5: MainConfig = MainConfig("../tests/configs/config5.yaml")
+
 def test_mainConfig_path() -> None:
     """
     Test the path attribute of the MainConfig class.
@@ -79,6 +81,15 @@ def test_mainConfig_content_functions() -> None:
     result = list(mainConfig1.getFunctionsBody("java", "tests/code/test.jar").keys())
     assert result ==  []
 
+def test_get_code_file_name() -> None:
+    """
+    Test the getter for the code file name
+    """
+    result = mainConfig1._getCodeFile("python", "tests/code/test.py", "multiply")
+    assert result == ""
+    result = mainConfig5._getCodeFile("python", "tests/code/test.py", "complex_test")
+    assert result == "tests/configs/config5.py"
+
 def test_mainConfig_content_functions_content_data() -> None:
     """
     Test the content attribute test data.
@@ -107,6 +118,15 @@ def test_mainConfig_content_functions_content_csv_path() -> None:
     assert mainConfig1.isPointingToCsvFile("python", "tests/code/test.py", "multiply")
     assert not mainConfig2.isPointingToCsvFile("python", "tests/code/test.py", "not_a_function")
     assert not mainConfig2.isPointingToCsvFile("python", "tests/code/file_does_not_exists.py", "not_a_function")
+
+def test_is_code_file_valid() -> None:
+    """
+    Test if a code file exists and is in the valid prog language.
+    """
+    assert mainConfig5._isCodeFileValid(
+        "tests/code/test.py",
+        "tests/configs/config5.py"
+    )
 
 def test_typifying_test_case_line() -> None:
     """
@@ -139,8 +159,6 @@ def test_mainConfig_content_functions_content_data_list() -> None:
         ([-1,10,1], [-10]),
         ([0.5,10.0,-1.0], [-5.0])
     ]
-
-    mainConfig5: MainConfig = MainConfig("../tests/configs/config5.yaml")
     result5 = mainConfig5.getTestData("python", "tests/code/test.py", "addAll")
     assert result5 == [
         ([1,2,3,4,5,6], [21])

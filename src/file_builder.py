@@ -3,6 +3,8 @@ import re
 
 import subprocess
 
+import hashlib
+
 from contextlib import contextmanager
 
 from rich.progress import Progress
@@ -15,6 +17,10 @@ class Script:
     def __init__(self, config: MainConfig, lang_config: LangConfig) -> None:
         self.mainConfig: MainConfig = config
         self.langConfig: LangConfig = lang_config
+
+    @classmethod
+    def hash_string(cls, s: str) -> str:
+        return hashlib.shake_256(s.encode('utf-8')).hexdigest(4)
 
     def getImports(self, language: str) -> list[str]:
         result: list[str] = []
@@ -37,18 +43,19 @@ class Script:
 
         return result
 
-    def getFunctionHead(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float]) -> str:
-        variables = self.langConfig.getVariables()
-
+    def getFunctionHead(self, language: str, module_name: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float]) -> str:
         scheme = self.langConfig.getTestSyntaxScheme()["is_unequal_test"]
         test_header = scheme.replace(
-            f"{variables["function_name"]}",
+            f"{self.langConfig.getVariable("module_name")}",
+            module_name
+        ).replace(
+            f"{self.langConfig.getVariable("function_name")}",
             function_name
         ).replace(
-            f"{variables["parameters"]}",
+            f"{self.langConfig.getVariable("parameters")}",
             ",".join(str(i) for i in parameters)
         ).replace(
-            f"{variables["expected_result"]}",
+            f"{self.langConfig.getVariable("expected_result")}",
             str(expected_result[0])
         )
         return test_header
@@ -89,48 +96,77 @@ class Script:
 
         return result
 
-    def getFunction(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str = "") -> list[str]:
+    def getReferenceHead(self, language: str, script_path: str, function_name: str) -> tuple[list[str], str]:
         result: list[str] = []
 
-        function_head = self.getFunctionHead(language, function_name, parameters, expected_result)
+        function_module = ""
+        code_file = ""
+        code_file = self.mainConfig._getCodeFile(language, script_path, function_name)
+
+        if not self.mainConfig._hasCodeFile(language, script_path, function_name):
+            # use structure from code file
+            code_file = script_path
+
+        variable: str = f"VAR_{self.hash_string(code_file)}"
+        function_module = variable
+
+        if self.mainConfig._isCodeFileValid(script_path, code_file):
+            # append import (from import references in config)
+
+            # check if variable didn't already exist
+            if not self.mainConfig.hasCustomVariable(language, variable):
+                self.mainConfig.addCustomVariable(language, variable)
+
+                # generate import header (use lang-config), replace path with own path and - replace old variable with hashed value
+                result.extend(self.langConfig.getModifiedImportHead(code_file, variable))
+                result.append("")
+
+        return result, function_module
+
+    def getFunction(self, language: str, script_path: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str = "") -> list[str]:
+        result: list[str] = []
+
+        reference_lines, module_variable = self.getReferenceHead(language, script_path, function_name)
+        result.extend(reference_lines)
+
+        function_head = self.getFunctionHead(language, module_variable, function_name, parameters, expected_result)
 
         if custom_syntax != "":
             function_head = self.getFunctionCustom(parameters, expected_result, custom_syntax)
 
         result.append(function_head)
-        result.extend(self.getFunctionBody(language, function_name, parameters, expected_result))
+        result.extend(self.getFunctionBody(language, f"{module_variable}.{function_name}", parameters, expected_result))
         result.append("")
 
         return result
 
-    def getAllTestsOfFunction(self, language: str, function_name: str) -> list[str]:
+    def getAllTestsOfFunction(self, language: str, script_path: str, function_name: str) -> list[str]:
         result: list[str] = []
 
-        script_path = self.mainConfig.getScripts(language)
-
-        data = self.mainConfig.getTestData(language, script_path[0], function_name)
+        data = self.mainConfig.getTestData(language, script_path, function_name)
         # test block
         for single_test in data:
             parameters, expected_result = single_test
 
-            result.extend(self.getFunction(language, function_name, parameters, expected_result))
+            result.extend(self.getFunction(language, script_path, function_name, parameters, expected_result))
 
         return result
 
     def getAllTests(self, language: str) -> list[str]:
         result: list[str] = []
 
-        script_path = self.mainConfig.getScripts(language)
+        script_paths = self.mainConfig.getScripts(language)
 
         result.extend(self.getImports(language))
 
         result.append("")
 
-        function_names = list(self.mainConfig.getFunctionsBody(language, script_path[0]).keys())
-        for function_name in function_names:
-            result.extend(self.getAllTestsOfFunction(language, function_name))
+        for script_path in script_paths:    # TODO: needs testing
+            function_names = list(self.mainConfig.getFunctionsBody(language, script_path).keys())
+            for function_name in function_names:
+                result.extend(self.getAllTestsOfFunction(language, script_path, function_name))
 
-        result.extend(self.langConfig.getFooterData())
+            result.extend(self.langConfig.getFooterData())
 
         return result
 

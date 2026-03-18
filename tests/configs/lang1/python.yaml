@@ -10,6 +10,7 @@ config:
         expected_result: "%expected_result%"
         calculated_result: "%calculated_result%"
         file_path: "%file_path%"
+        module_name: "%module_name%"
 unit-test:
     syntax_scheme:
         header_data:
@@ -18,16 +19,15 @@ unit-test:
             - 'import importlib.util'
             - ''
             - 'ROOT = Path(__file__).resolve().parents[1]'
-            - 'module_path = ROOT / "%file_path%"'
-            - ''
-            - 'spec = importlib.util.spec_from_file_location("test_module",module_path)'
-            - 'test_module = importlib.util.module_from_spec(spec) # type: ignore'
-            - 'spec.loader.exec_module(test_module) # type: ignore'
+        import_head:
+            - 'spec = importlib.util.spec_from_file_location("%module_name%", ROOT / "%file_path%")'
+            - '%module_name% = importlib.util.module_from_spec(spec) # type: ignore'
+            - 'spec.loader.exec_module(%module_name%) # type: ignore'
         single_test_code:
             - is_equal_test:
-                scheme: 'if test_module.%function_name%(%parameters%) == %expected_result%:'
+                scheme: 'if %module_name%.%function_name%(%parameters%) == %expected_result%:'
             - is_unequal_test:
-                scheme: 'if test_module.%function_name%(%parameters%) != %expected_result%:'
+                scheme: 'if %module_name%.%function_name%(%parameters%) != %expected_result%:'
         if_success:
             run:
                 exit_code: 0

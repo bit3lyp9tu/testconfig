@@ -27,7 +27,9 @@ python:
                 csv_path: 'tests/data/test.csv'
             addAll:
                 csv_path: 'tests/data/complex_data.csv'
-                code_file: 'tests/config/config5.py'
+            complex_test:
+                csv_path: 'tests/data/complex_data.csv'
+                code_file: 'tests/configs/config5.py'
     file_shutdown:
         commands:
            - "echo SHUTDOWN"

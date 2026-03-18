@@ -26,7 +26,21 @@ def test_langConfig_config_variables() -> None:
         "file_path": "%file_path%",
         "parameters": "%parameters%",
         "expected_result": "%expected_result%",
+        "module_name": "%module_name%",
         "calculated_result": "%calculated_result%"
+    }
+
+def test_syntax_scheme() -> None:
+    """
+    Test Syntax Scheme getter
+    """
+    result = langConfig1.getSyntaxScheme()
+    assert result.keys() == {
+        "header_data",
+        "import_head",
+        "single_test_code",
+        "if_success",
+        "if_failure"
     }
 
 def test_langConfig_header_data() -> None:
@@ -39,12 +53,7 @@ def test_langConfig_header_data() -> None:
         'from pathlib import Path',
         'import importlib.util',
         '',
-        'ROOT = Path(__file__).resolve().parents[1]',
-        'module_path = ROOT / "%file_path%"',
-        '',
-        'spec = importlib.util.spec_from_file_location("test_module",module_path)',
-        'test_module = importlib.util.module_from_spec(spec) # type: ignore',
-        'spec.loader.exec_module(test_module) # type: ignore'
+        'ROOT = Path(__file__).resolve().parents[1]'
     ]
     result2 = langConfig2.getHeaderData()
     assert result2 == []
@@ -55,6 +64,16 @@ def test_langConfig_header_data() -> None:
     # result = LangConfig("../tests/configs/lang2/python.yaml").getHeaderData()
     # assert result == []
 
+def test_import_head() -> None:
+    """
+    Test import head getter
+    """
+    result = LangConfig("../tests/configs/lang1/python.yaml").getImportHead()
+    assert result == [
+        'spec = importlib.util.spec_from_file_location("%module_name%", ROOT / "%file_path%")',
+        '%module_name% = importlib.util.module_from_spec(spec) # type: ignore',
+        'spec.loader.exec_module(%module_name%) # type: ignore'
+    ]
 
 def test_langConfig_footer_data() -> None:
     """
@@ -76,8 +95,8 @@ def test_langConfig_syntax_scheme() -> None:
     """
     result = langConfig1.getTestSyntaxScheme()
     assert result == {
-        "is_equal_test": "if test_module.%function_name%(%parameters%) == %expected_result%:",
-        "is_unequal_test": "if test_module.%function_name%(%parameters%) != %expected_result%:",
+        "is_equal_test": "if %module_name%.%function_name%(%parameters%) == %expected_result%:",
+        "is_unequal_test": "if %module_name%.%function_name%(%parameters%) != %expected_result%:",
     }
 
 def test_langConfig_fail_message() -> None:
