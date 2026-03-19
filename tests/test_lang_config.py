@@ -53,7 +53,8 @@ def test_langConfig_header_data() -> None:
         'from pathlib import Path',
         'import importlib.util',
         '',
-        'ROOT = Path(__file__).resolve().parents[1]'
+        'ROOT = Path(__file__).resolve().parents[1]',
+        'sys.path.insert(0, str(ROOT))'
     ]
     result2 = langConfig2.getHeaderData()
     assert result2 == []

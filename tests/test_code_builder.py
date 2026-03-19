@@ -31,7 +31,8 @@ def test_build_import() -> None:
         'from pathlib import Path',
         'import importlib.util',
         '',
-        'ROOT = Path(__file__).resolve().parents[1]'
+        'ROOT = Path(__file__).resolve().parents[1]',
+        'sys.path.insert(0, str(ROOT))'
     ]
 
 def test_build_function_head() -> None:
@@ -190,6 +191,7 @@ def test_build_all_tests_python() -> None:
         'import importlib.util',
         '',
         'ROOT = Path(__file__).resolve().parents[1]',
+        'sys.path.insert(0, str(ROOT))',
         '',
         'if VAR_81174737.add(1,2,3) != 6:',
         "\tprint('[FAIL] tests/code/test.py#VAR_81174737.add(1,2,3) != 6')",
