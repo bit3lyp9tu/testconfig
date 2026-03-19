@@ -1,0 +1,2 @@
+function;x_n;y_n;syntax
+Script(MainConfig("../tests/configs/config1.yaml"), LangConfig( "../tests/configs/lang1/python.yaml")).getImports;[python];['import sys','from pathlib import Path','import importlib.util','','ROOT = Path(__file__).resolve().parents[1]','sys.path.insert(0, str(ROOT))'];

@@ -1,0 +1,34 @@
+general_setup:
+    attributes:
+        file_path: 'selftest'
+        requirements_path: ''
+    commands:
+python:
+    file_setup:
+        attributes:
+        commands:
+    src/config_parser.py:
+        tests:
+
+    src/file_builder.py:
+        tests:
+            Script.hash_string:
+                -  -> 46b9dd2b
+                - hello -> 1234075a
+                - tests/code/test.py -> 81174737
+            getImports:
+                csv_path: selftest/data/code_builder.csv
+            getFunctionHead:
+                - python, test_module, add, [1,2,3], [6] -> 'if test_module.add(1,2,3) != 6'
+    src/hook.py:
+        tests:
+    src/layer.py:
+        tests:
+    src/log_level.py:
+        tests:
+    src/prototype.py:
+        tests:
+    file_shutdown:
+        commands:
+general_shutdown:
+    commands:
