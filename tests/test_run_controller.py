@@ -56,6 +56,7 @@ def test_run_command() -> None:
         'pytest.ini',
         'README.md',
         'run.sh',
+        'selftest',
         'src',
         'test_report.txt',
         'tests',

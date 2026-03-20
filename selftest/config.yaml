@@ -20,6 +20,10 @@ python:
                 csv_path: selftest/data/code_builder.csv
             getFunctionHead:
                 - python, test_module, add, [1,2,3], [6] -> 'if test_module.add(1,2,3) != 6'
+            getFunctionBody:
+                csv_path: selftest/data/code_builder.csv
+            getFunctionCustom:
+                csv_path: selftest/data/code_builder.csv
     src/hook.py:
         tests:
     src/layer.py:

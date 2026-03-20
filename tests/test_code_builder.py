@@ -56,8 +56,10 @@ def test_build_function_custom() -> None:
     """
     Test custom function getter
     """
-    result = cb.getFunctionCustom([1,2,3,4,5,6], [21], "addAll(x_n)==y_n")
+    result = cb.getFunctionCustom("addAll", [1,2,3,4,5,6], [21], "addAll(x_n)==y_n")
     assert result == "addAll(1,2,3,4,5,6)==21"
+    result = cb5.getFunctionCustom("getParam", [5], [6], "AClass(x_n).function()==y_n")
+    assert result == "AClass(5).getParam()==6"
 
 def test_reference_head() -> None:
     """
@@ -99,10 +101,16 @@ def test_build_function() -> None:
     result = cb5_2.getFunction("python", "tests/code/test.py", "addAll", [1,2,3,4,5,6], [21], "if VAR_81174737.addAll(x_n) != y_n:")
     assert result == [
         "if VAR_81174737.addAll(1,2,3,4,5,6) != 21:",
-        "\tprint('[FAIL] tests/code/test.py#VAR_81174737.addAll(1,2,3,4,5,6) != 21')",
-        "\tsys.exit(1)",
+        "\tprint('[FAIL] if VAR_81174737.addAll(1,2,3,4,5,6) != 21:')",
         ""
     ]
+    result = cb5_2.getFunction("python", "tests/code/test.py", "getParam", [5], [6], "if VAR_81174737.AClass(x_n).function()==y_n:")
+    assert result == [
+        "if VAR_81174737.AClass(5).getParam()==6:",
+        "\tprint('[FAIL] if VAR_81174737.AClass(5).getParam()==6:')",
+        ""
+    ]
+
     assert cb5_2.mainConfig.custom_module_variables == {
         'cpp': [],
         'php': [],
@@ -253,36 +261,25 @@ def test_build_all_tests_php() -> None:
         '',
         'if (add(1,2,3) != 6) {throw new Exception("Test Failed");}',
         '',
-        '',
         'if (add(4,5,6) != 15) {throw new Exception("Test Failed");}',
-        '',
         '',
         'if (add(-1,1,1) != 1) {throw new Exception("Test Failed");}',
         '',
-        '',
         'if (add(10,-10,5) != 5) {throw new Exception("Test Failed");}',
-        '',
         '',
         'if (add(0.5,0.5,0.5) != 1.5) {throw new Exception("Test Failed");}',
         '',
-        '',
         'if (add(0.5,-0.5,0.5) != 0.5) {throw new Exception("Test Failed");}',
-        '',
         '',
         'if (subtract(10,5) != 5) {throw new Exception("Test Failed");}',
         '',
-        '',
         'if (multiply(7,8,9) != 504) {throw new Exception("Test Failed");}',
-        '',
         '',
         'if (multiply(10,11,12) != 1320) {throw new Exception("Test Failed");}',
         '',
-        '',
         'if (multiply(-1,10,1) != -10) {throw new Exception("Test Failed");}',
         '',
-        '',
         'if (multiply(0.5,10,-1) != -5.0) {throw new Exception("Test Failed");}',
-        '',
         '',
         '',
         '?>',

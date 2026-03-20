@@ -60,40 +60,67 @@ class Script:
         )
         return test_header
 
-    def getFunctionCustom(self, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str) -> str:
+    def getFunctionCustom(self, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str) -> str:
+        function = "function"
+        x_n = "x_n"
+        y_n = "y_n"
+
         return f"{custom_syntax.replace(
-            'x_n',
+            x_n,
             ','.join(str(x) for x in parameters)
         ).replace(
-            'y_n',
+            y_n,
             ','.join(str(x) for x in expected_result)
+        ).replace(
+            function,
+            function_name
         )}"
 
-    def getFunctionBody(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float]) -> list[str]:
+    def getFunctionBody(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str = "") -> list[str]:
         result: list[str] = []
 
         script_path = self.mainConfig.getScripts(language)[0]
 
-        fail_msg_lines = self.langConfig.getFailMessages()
+        fail_msg_lines = self.langConfig.getDefaultFailMessages()
+        if custom_syntax != "":
+            fail_msg_lines = self.langConfig.getCustomFailMessages()
 
         variables = self.langConfig.getVariables()
 
         for fail_msg in fail_msg_lines:
-            test_body = fail_msg.replace(
-                f"{variables["file_path"]}",
-                script_path
-            ).replace(
-                f"{variables["function_name"]}",
-                function_name
-            ).replace(
-                f"{variables["parameters"]}",
-                ",".join(str(i) for i in parameters)
-            ).replace(
-                f"{variables["expected_result"]}",
-                str(expected_result[0])
-            )
-            result.append(test_body)
+            if custom_syntax != "":
+                function = "function"
+                x_n = "x_n"
+                y_n = "y_n"
 
+                result.append(fail_msg.replace(
+                    f"{variables["custom_test_case"]}",
+                    f"{custom_syntax.replace(
+                        x_n,
+                        ','.join(str(x) for x in parameters)
+                    ).replace(
+                        y_n,
+                        ','.join(str(x) for x in expected_result)
+                    ).replace(
+                        function,
+                        function_name
+                )}"))
+
+            else:
+                test_body = fail_msg.replace(
+                    f"{variables["file_path"]}",
+                    script_path
+                ).replace(
+                    f"{variables["function_name"]}",
+                    function_name
+                ).replace(
+                    f"{variables["parameters"]}",
+                    ",".join(str(i) for i in parameters)
+                ).replace(
+                    f"{variables["expected_result"]}",
+                    str(expected_result[0])
+                )
+                result.append(f"{test_body}")
         return result
 
     def getReferenceHead(self, language: str, script_path: str, function_name: str) -> tuple[list[str], str]:
@@ -133,10 +160,16 @@ class Script:
         function_head = self.getFunctionHead(language, module_variable, function_name, parameters, expected_result)
 
         if custom_syntax != "":
-            function_head = self.getFunctionCustom(parameters, expected_result, custom_syntax)
+            function_head = self.getFunctionCustom(function_name, parameters, expected_result, custom_syntax)
 
         result.append(function_head)
-        result.extend(self.getFunctionBody(language, f"{module_variable}.{function_name}", parameters, expected_result))
+        result.extend(self.getFunctionBody(
+            language,
+            f"{ "" if custom_syntax != "" else (module_variable + ".")}{function_name}",
+            parameters,
+            expected_result,
+            custom_syntax
+        ))
         result.append("")
 
         return result

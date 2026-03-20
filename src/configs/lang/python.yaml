@@ -9,6 +9,7 @@ config:
         parameters: "%parameters%"
         expected_result: "%expected_result%"
         calculated_result: "%calculated_result%"
+        custom_test_case: "%custom_test_case%"
 unit-test:
     syntax_scheme:
         header_data:
@@ -26,8 +27,11 @@ unit-test:
         if_failure:
             run:
                 messages:
-                   - "\tprint('[FAIL] %module%.%function_name%(%parameters%) != %expected_result%')"
-                   - "\tsys.exit(1)"
+                    default_case:
+                        - "\tprint('[FAIL] %file_path%#%function_name%(%parameters%) != %expected_result%')"
+                        - "\tsys.exit(1)"
+                    custom_case:
+                        - "\tprint('[FAIL] %custom_test_case%')"
                 exit_code: 1
 hooks:
     general_setup:

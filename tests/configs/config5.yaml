@@ -30,6 +30,8 @@ python:
             complex_test:
                 csv_path: 'tests/data/complex_data.csv'
                 code_file: 'tests/configs/config5.py'
+            getParam:
+                csv_path: 'tests/data/complex_data.csv'
     file_shutdown:
         commands:
            - "echo SHUTDOWN"

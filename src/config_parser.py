@@ -292,8 +292,29 @@ class LangConfig:
             for test_types in self.content["unit-test"]["syntax_scheme"]["single_test_code"]
         }
 
-    def getFailMessages(self) -> list[str]:
-        return self.content["unit-test"]["syntax_scheme"]["if_failure"]["run"]["messages"]
+    # TODO: needs testing
+    def getFailMessages(self) -> dict:
+        return self.content.get(
+                "unit-test", {}
+            ).get(
+                "syntax_scheme", {}
+            ).get(
+                "if_failure", {}
+            ).get(
+                "run", {}
+            ).get(
+                "messages", {}
+            )
+
+    # TODO: needs testing
+    def getDefaultFailMessages(self) -> list[str]:
+        result = self.getFailMessages().get("default_case", [])
+        return [] if result == None else result
+
+    # TODO: needs testing
+    def getCustomFailMessages(self) -> list[str]:
+        result = self.getFailMessages().get("custom_case", [])
+        return [] if result == None else result
 
     def hasValidHookTypes(self) -> bool:
         return len(set(self.content["hooks"].keys()).union({

@@ -27,7 +27,9 @@ unit-test:
         if_failure:
             run:
                 messages:
-                  - ""
+                    messages:
+                    default_case:
+                    custom_case:
                 exit_code: 1
         footer_data:
           - ""

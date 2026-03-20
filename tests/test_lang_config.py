@@ -27,7 +27,8 @@ def test_langConfig_config_variables() -> None:
         "parameters": "%parameters%",
         "expected_result": "%expected_result%",
         "module_name": "%module_name%",
-        "calculated_result": "%calculated_result%"
+        "calculated_result": "%calculated_result%",
+        "custom_test_case": "%custom_test_case%"
     }
 
 def test_syntax_scheme() -> None:
@@ -104,10 +105,14 @@ def test_langConfig_fail_message() -> None:
     """
     Test FailMessage getter
     """
-    result = langConfig1.getFailMessages()
+    result = langConfig1.getDefaultFailMessages()
     assert result == [
         "\tprint('[FAIL] %file_path%#%function_name%(%parameters%) != %expected_result%')",
         "\tsys.exit(1)"
+    ]
+    result = langConfig1.getCustomFailMessages()
+    assert result == [
+        "\tprint('[FAIL] %custom_test_case%')"
     ]
 
 def test_langConfig_hook_type_validator() -> None:

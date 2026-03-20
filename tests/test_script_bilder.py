@@ -28,6 +28,7 @@ def test_run_command_executor() -> None:
         "packages_src.dot",
         "pytest.ini",
         "run.sh",
+        "selftest",
         "src",
         "test_report.txt",
         "tests",
