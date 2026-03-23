@@ -50,21 +50,21 @@ def main():
         LogLevel(4, "[FATAL]", "black on red")
     )
 
-    try:
-        tester = RunController(
-            args.config,
-            args.lang_config_dict,
-            LOGS
+    tester = RunController(
+        args.config,
+        args.lang_config_dict,
+        LOGS
+    )
+    Writer(
+        tester.start(
+            args.test_path,
+            bool(args.keep_script_files)
         )
-        Writer(
-            tester.start(
-                args.test_path,
-                bool(args.keep_script_files)
-            )
-        ).write(args.report, False)
+    ).write(args.report, False)
+    # try:
 
-    except Exception as e:
-        LOGS.print(4, f"{e}")
+    # except Exception as e:
+    #     LOGS.print(4, f"{e}")
 
 
 if __name__ == '__main__':

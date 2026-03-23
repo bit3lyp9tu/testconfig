@@ -96,12 +96,12 @@ def test_mainConfig_content_functions_content_data() -> None:
     """
     result = mainConfig1.getFunction("python", "tests/code/test.py", "add")
     assert result == [
-        '1,2,3 -> 6',
-        '4,5,6 -> 15',
-        '-1,1,1 -> 1',
-        '10,-10,5 -> 5',
-        '0.5,0.5,0.5 -> 1.5',
-        '0.5,-0.5,0.5 -> 0.5'
+        '1;2;3 -> 6',
+        '4;5;6 -> 15',
+        '-1;1;1 -> 1',
+        '10;-10;5 -> 5',
+        '0.5;0.5;0.5 -> 1.5',
+        '0.5;-0.5;0.5 -> 0.5'
     ]
     result1 = mainConfig1.getFunction("python", "tests/code/test.py", "multiply")
     assert result1 == []
@@ -132,11 +132,11 @@ def test_typifying_test_case_line() -> None:
     """
     Test the typifying function for the test case line
     """
-    result = mainConfig1._typifyTestCaseToList("1,-2,3")
+    result = mainConfig1._typifyTestCaseToList("1;-2;3")
     assert result == [1, -2, 3]
-    result2 = mainConfig1._typifyTestCaseToList("1.1,2.2,-3.3")
+    result2 = mainConfig1._typifyTestCaseToList("1.1;2.2;-3.3")
     assert result2 == [1.1, 2.2, -3.3]
-    result3 = mainConfig1._typifyTestCaseToList("hello,world,!")
+    result3 = mainConfig1._typifyTestCaseToList("hello;world;!")
     assert result3 == ["hello", "world", "!"]
 
 def test_mainConfig_content_functions_content_data_list() -> None:

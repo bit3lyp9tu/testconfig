@@ -101,10 +101,10 @@ class MainConfig:
     def _isCodeFileValid(self, script_path: str, file: str) -> bool:
         return script_path.split(".")[-1] == file.split(".")[-1] and Path(file).is_file()
 
-    def _typifyTestCaseToList(self, testCaseParameters: str) -> list[int | float | str]:
+    def _typifyTestCaseToList(self, testCaseParameters: str, separator: str = ";") -> list[int | float | str]:
         typified_parameters: list[int | float | str] = []
 
-        for parameter in testCaseParameters.split(",") :
+        for parameter in testCaseParameters.split(separator):
             if re.match(r'^[+-]?[0-9]+$', parameter) or re.match(r'[-]?[0-9]*\.[0-9]*', parameter):
                 if re.match(r'^[+-]?[0-9]+$', parameter):
                     typified_parameters.append(int(parameter))
@@ -151,8 +151,8 @@ class MainConfig:
                     lines = csv.reader(file, delimiter=';')
                     for param in list(lines)[1:]:
                         if param[0] == function:
-                            x2_n: list[int | float | str] = self._typifyTestCaseToList(param[1].replace("[", "").replace("]", ""))
-                            y2_n: list[int | float | str] = self._typifyTestCaseToList(param[2].replace("[", "").replace("]", ""))
+                            x2_n: list[int | float | str] = self._typifyTestCaseToList(param[1].replace("[", "").replace("]", ""), separator=",")
+                            y2_n: list[int | float | str] = self._typifyTestCaseToList(param[2].replace("[", "").replace("]", ""), separator=",")
 
                             results.append((x2_n, y2_n))
 

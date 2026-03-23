@@ -36,7 +36,7 @@ class Hook:
                     attributes = {i: "" for i in list(dict(data["attributes"]).keys())}
                 else:
                     attributes = dict(data["attributes"])
-            commands = list(data["commands"] if "commands" in data.keys() else [])
+            commands = list(data["commands"] if "commands" in data.keys() and data["commands"] != None else [])
             description = str(data["description"] if "description" in data.keys() else "")
 
         self.attributes: dict[str, str] = attributes

@@ -29,7 +29,7 @@ unit-test:
             - is_equal_test:
                 scheme: ''
             - is_unequal_test:
-                scheme: 'def test_%function_name%() -> None:'
+                scheme: 'def test_%function_name%():'
         if_success:
             run:
                 exit_code: 0
@@ -37,8 +37,9 @@ unit-test:
             run:
                 messages:
                     default_case:
-                        - "\tprint('[FAIL] %file_path%#%function_name%(%parameters%) != %expected_result%')"
-                        - "\tsys.exit(1)"
+                        - "\tassert %function_name%(%parameters%) == %expected_result%"
+                        # - "\tprint('[FAIL] %file_path%#%function_name%(%parameters%) != %expected_result%')"
+                        # - "\tsys.exit(1)"
                     custom_case:
                         - "\tassert %custom_test_case%"
                 exit_code: 1
@@ -54,7 +55,7 @@ hooks:
             - 'pip install -r $requirements_path >/dev/null 2>&1'
     general_shutdown:
         commands:
-            - 'rm $file_path/*'
+            # - 'rm $file_path/*'
             - 'echo Teardown env'
     file_setup:
     file_shutdown:

@@ -13,6 +13,7 @@ test_report.txt
 
 src/demo_file.*
 tests/demo_file.*
+selftest/demo_file.*
 
 todo.md
 **/*.pyc

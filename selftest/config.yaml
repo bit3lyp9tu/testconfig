@@ -3,23 +3,21 @@ general_setup:
         file_path: 'selftest'
         requirements_path: ''
     commands:
+        - 'echo Testing'
 python:
     file_setup:
-        attributes:
-        commands:
     src/config_parser.py:
         tests:
-
     src/file_builder.py:
         tests:
-            Script.hash_string:
-                -  -> 46b9dd2b
+            hash_string:
+                -  -> '46b9dd2b'
                 - hello -> 1234075a
                 - tests/code/test.py -> 81174737
             getImports:
                 csv_path: selftest/data/code_builder.csv
             getFunctionHead:
-                - python, test_module, add, [1,2,3], [6] -> 'if test_module.add(1,2,3) != 6'
+                - python; test_module; add; [1,2,3], [6] -> 'if test_module.add(1,2,3) != 6'
             getFunctionBody:
                 csv_path: selftest/data/code_builder.csv
             getFunctionCustom:
@@ -33,6 +31,4 @@ python:
     src/prototype.py:
         tests:
     file_shutdown:
-        commands:
 general_shutdown:
-    commands:
