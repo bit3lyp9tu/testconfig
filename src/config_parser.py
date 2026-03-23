@@ -106,7 +106,9 @@ class MainConfig:
         typified_parameters: list[int | float | str] = []
 
         for parameter in testCaseParameters.split(separator):
-            if re.match(r'^[+-]?[0-9]+$', parameter) or re.match(r'[-]?[0-9]*\.[0-9]*', parameter):
+            if parameter == "_":
+                typified_parameters.append("")
+            elif re.match(r'^[+-]?[0-9]+$', parameter) or re.match(r'[-]?[0-9]*\.[0-9]*', parameter):
                 if re.match(r'^[+-]?[0-9]+$', parameter):
                     typified_parameters.append(int(parameter))
                 if re.match(r'[-]?[0-9]*\.[0-9]*', parameter):

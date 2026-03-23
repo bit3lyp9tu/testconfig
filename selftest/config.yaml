@@ -13,7 +13,7 @@ python:
             Script.hash_string:
                 - _ -> 46b9dd2b
                 - hello -> 1234075a
-                - tests/code/test.py -> 81174737
+                - tests/code/test.py -> '81174737'
             getImports:
                 csv_path: selftest/data/code_builder.csv
             getFunctionHead:

@@ -19,7 +19,7 @@ class Script:
         self.langConfig: LangConfig = lang_config
 
     @classmethod
-    def hash_string(cls, s: str) -> str:
+    def hash_string(cls, s: str = "") -> str:
         return hashlib.shake_256(s.encode('utf-8')).hexdigest(4)
 
     def getImports(self, language: str) -> list[str]:
