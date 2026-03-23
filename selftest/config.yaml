@@ -10,8 +10,8 @@ python:
         tests:
     src/file_builder.py:
         tests:
-            hash_string:
-                -  -> 46b9dd2b
+            Script.hash_string:
+                - _ -> 46b9dd2b
                 - hello -> 1234075a
                 - tests/code/test.py -> 81174737
             getImports:

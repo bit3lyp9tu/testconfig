@@ -197,6 +197,11 @@ class Script:
 
         for script_path in script_paths:    # TODO: needs testing
             function_names = list(self.mainConfig.getFunctionsBody(language, script_path).keys())
+
+            result.append("")
+            result.extend(self.langConfig.getModifiedImportHead(script_path, f"VAR_{self.hash_string(script_path)}"))
+            result.append("")
+
             for function_name in function_names:
                 result.extend(self.getAllTestsOfFunction(language, script_path, function_name))
 
