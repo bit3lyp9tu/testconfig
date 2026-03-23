@@ -21,6 +21,7 @@ class MainConfig:
         self.content: dict[str, dict] = {}
         with open(abs_file_path, 'r') as file:
             self.content = yaml.safe_load(file)
+        print(self.content["python"].keys())
 
         # TODO: needs testing
         self.custom_module_variables: dict[str, list[str]] = {
@@ -111,7 +112,10 @@ class MainConfig:
                 if re.match(r'[-]?[0-9]*\.[0-9]*', parameter):
                     typified_parameters.append(float(parameter))
             else:
-                typified_parameters.append(parameter)
+                if parameter[0] == "'" and parameter[-1] == "'" or parameter[0] == '"' and parameter[-1] == '"':
+                    typified_parameters.append(parameter)
+                else:
+                    typified_parameters.append("'" + str(parameter) + "'")
         return typified_parameters
 
     # TODO: needs testing

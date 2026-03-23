@@ -11,13 +11,13 @@ python:
     src/file_builder.py:
         tests:
             hash_string:
-                -  -> '46b9dd2b'
+                -  -> 46b9dd2b
                 - hello -> 1234075a
                 - tests/code/test.py -> 81174737
             getImports:
                 csv_path: selftest/data/code_builder.csv
             getFunctionHead:
-                - python; test_module; add; [1,2,3], [6] -> 'if test_module.add(1,2,3) != 6'
+                - python;test_module;add;[1,2,3],[6] -> 'if test_module.add(1,2,3) != 6'
             getFunctionBody:
                 csv_path: selftest/data/code_builder.csv
             getFunctionCustom:
