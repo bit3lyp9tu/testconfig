@@ -15,13 +15,13 @@ python:
                 - hello -> 1234075a
                 - tests/code/test.py -> '81174737'
             getImports:
-                csv_path: selftest/data/code_builder.csv
+                csv_path: 'selftest/data/code_builder_data.csv'
             getFunctionHead:
                 - python;test_module;add;[1,2,3],[6] -> 'if test_module.add(1,2,3) != 6'
             getFunctionBody:
-                csv_path: selftest/data/code_builder.csv
+                csv_path: 'selftest/data/code_builder_data.csv'
             getFunctionCustom:
-                csv_path: selftest/data/code_builder.csv
+                csv_path: 'selftest/data/code_builder_data.csv'
     src/hook.py:
         tests:
     src/layer.py:

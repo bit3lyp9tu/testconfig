@@ -20,8 +20,9 @@ class MainConfig:
 
         self.content: dict[str, dict] = {}
         with open(abs_file_path, 'r') as file:
+            # TODO: needs centralized format validator which throws error if format is wrong or file references are faulty
             self.content = yaml.safe_load(file)
-        print(self.content["python"].keys())
+        # print(self.content["python"].keys())
 
         # TODO: needs testing
         self.custom_module_variables: dict[str, list[str]] = {
@@ -152,6 +153,7 @@ class MainConfig:
         else:
             # use data from csv file
             path: str = body["csv_path"]
+            print(f"{path}:{lang}/{script_path}/{function} -> {self.isPointingToCsvFile(lang, script_path, function)}")
             if self.isPointingToCsvFile(lang, script_path, function):
                 with open(path, 'r') as file:
                     lines = csv.reader(file, delimiter=';')
