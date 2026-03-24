@@ -6,11 +6,14 @@ config:
     variables:
         import_module: "%module%"
         function_name: "%function_name%"
+        function_index: "%function_index%"
         parameters: "%parameters%"
         expected_result: "%expected_result%"
         calculated_result: "%calculated_result%"
         file_path: "%file_path%"
         module_name: "%module_name%"
+        custom_test_case: "%custom_test_case%"
+        generic_hash: "%generic_hash%"
 unit-test:
     syntax_scheme:
         header_data:
