@@ -23,7 +23,9 @@ def test_langConfig_config_variables() -> None:
     assert result == {
         "import_module": "%module%",
         "function_name": "%function_name%",
+        "generic_hash": "%generic_hash%",
         "file_path": "%file_path%",
+        "function_index": "%function_index%",
         "parameters": "%parameters%",
         "expected_result": "%expected_result%",
         "module_name": "%module_name%",

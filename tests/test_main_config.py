@@ -145,23 +145,23 @@ def test_mainConfig_content_functions_content_data_list() -> None:
     """
     result = mainConfig1.getTestData("python", "tests/code/test.py", "add")
     assert result == [
-        ([1,2,3], [6]),
-        ([4,5,6], [15]),
-        ([-1,1,1], [1]),
-        ([10,-10,5], [5]),
-        ([0.5,0.5,0.5], [1.5]),
-        ([0.5,-0.5,0.5], [0.5])
+        ("1, 2, 3", "6"),
+        ("4, 5, 6", "15"),
+        ("-1, 1, 1", "1"),
+        ("10, -10, 5", "5"),
+        ("0.5, 0.5, 0.5", "1.5"),
+        ("0.5, -0.5, 0.5", "0.5")
     ]
     result2 = mainConfig1.getTestData("python", "tests/code/test.py", "multiply")
     assert result2 == [
-        ([7,8,9], [504]),
-        ([10,11,12], [1320]),
-        ([-1,10,1], [-10]),
-        ([0.5,10.0,-1.0], [-5.0])
+        ("7,8,9", "504"),
+        ("10,11,12", "1320"),
+        ("-1,10,1", "-10"),
+        ("0.5,10,-1", "-5.0")
     ]
     result5 = mainConfig5.getTestData("python", "tests/code/test.py", "addAll")
     assert result5 == [
-        ([1,2,3,4,5,6], [21])
+        ("1,2,3,4,5,6", "21")
     ]
 
 DATA_GENERAL_LAYER3 = {
