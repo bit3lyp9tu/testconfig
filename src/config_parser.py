@@ -118,7 +118,7 @@ class MainConfig:
                 if has_string_encapsulation and (parameter[0] == "'" and parameter[-1] == "'" or parameter[0] == '"' and parameter[-1] == '"'):
                     typified_parameters.append(parameter)
                 else:
-                    typified_parameters.append("'" + str(parameter) + "'")
+                    typified_parameters.append(str(parameter))
         return typified_parameters
 
     # TODO: needs testing
@@ -244,7 +244,7 @@ class LangConfig:
         variable: dict = self.getVariables()
 
         if key in variable and variable[key] != None:
-            return variable[key]
+            return variable.get(key, "")
         else:
             raise Exception(f"Parameter {self.path}#config.variables.{key} does not exist")
 
