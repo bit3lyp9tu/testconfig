@@ -267,11 +267,12 @@ class LangConfig:
             return []
         return content["import_head"]
 
-    def getModifiedImportHead(self, file_path: str, module_name: str) -> list[str]:
+    def getModifiedImportHead(self, file_path: str, module_name: str, hash: str = "") -> list[str]:
         result: list[str] = []
 
         mask_file_path = self.content["config"]["variables"].get("file_path", "")
         mask_module_name = self.content["config"]["variables"].get("module_name", "")
+        mask_generic_hash = self.content["config"]["variables"].get("generic_hash", "")
 
         for line in self.getImportHead():
             result.append(
@@ -281,6 +282,9 @@ class LangConfig:
                 ).replace(
                     mask_module_name,
                     module_name
+                ).replace(
+                    mask_generic_hash,
+                    hash
                 )
             )
         return result

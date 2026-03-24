@@ -19,8 +19,8 @@ class Script:
         self.langConfig: LangConfig = lang_config
 
     @classmethod
-    def hash_string(cls, s: str = "") -> str:
-        return hashlib.shake_256(s.encode('utf-8')).hexdigest(4)
+    def hash_string(cls, s: str = "", hex_length: int = 4) -> str:
+        return hashlib.shake_256(s.encode('utf-8')).hexdigest(hex_length)
 
     def getImports(self, language: str) -> list[str]:
         result: list[str] = []
@@ -43,7 +43,7 @@ class Script:
 
         return result
 
-    def getFunctionHead(self, language: str, module_name: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float]) -> str:
+    def getFunctionHead(self, language: str, module_name: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], function_index: int = 0, hash: str = "") -> str:
         scheme = self.langConfig.getTestSyntaxScheme()["is_unequal_test"]
         test_header = scheme.replace(
             f"{self.langConfig.getVariable("module_name")}",
@@ -52,11 +52,17 @@ class Script:
             f"{self.langConfig.getVariable("function_name")}",
             function_name
         ).replace(
+            f"{self.langConfig.getVariable("function_index")}",
+            f"{function_index}"
+        ).replace(
             f"{self.langConfig.getVariable("parameters")}",
             ",".join(str(i) for i in parameters)
         ).replace(
             f"{self.langConfig.getVariable("expected_result")}",
             str(expected_result[0])
+        ).replace(
+            f"{self.langConfig.getVariable("generic_hash")}",
+            hash
         )
         return test_header
 
@@ -76,7 +82,7 @@ class Script:
             function_name
         )}"
 
-    def getFunctionBody(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str = "") -> list[str]:
+    def getFunctionBody(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str = "", function_index: int = 0, hash: str = "") -> list[str]:
         result: list[str] = []
 
         script_path = self.mainConfig.getScripts(language)[0]
@@ -114,11 +120,17 @@ class Script:
                     f"{variables["function_name"]}",
                     function_name
                 ).replace(
+                    f"{self.langConfig.getVariable("function_index")}",
+                    f"{function_index}"
+                ).replace(
                     f"{variables["parameters"]}",
                     ",".join(str(i) for i in parameters)
                 ).replace(
                     f"{variables["expected_result"]}",
                     str(expected_result[0])
+                ).replace(
+                    f"{self.langConfig.getVariable("generic_hash")}",
+                    hash
                 )
                 result.append(f"{test_body}")
         return result
@@ -151,13 +163,25 @@ class Script:
 
         return result, function_module
 
-    def getFunction(self, language: str, script_path: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str = "") -> list[str]:
+    def getFunction(
+            self,
+            language: str,
+            script_path: str,
+            function_name: str,
+            parameters: list[str|int|float],
+            expected_result: list[str|int|float],
+            custom_syntax: str = "",
+            index: int = 0
+        ) -> list[str]:
+
         result: list[str] = []
+
+        hash = self.hash_string(f"{language}:{script_path}:{function_name}:{index}", hex_length=8)
 
         reference_lines, module_variable = self.getReferenceHead(language, script_path, function_name)
         result.extend(reference_lines)
 
-        function_head = self.getFunctionHead(language, module_variable, function_name, parameters, expected_result)
+        function_head = self.getFunctionHead(language, module_variable, function_name, parameters, expected_result, index, hash)
 
         if custom_syntax != "":
             function_head = self.getFunctionCustom(function_name, parameters, expected_result, custom_syntax)
@@ -168,7 +192,9 @@ class Script:
             f"{ "" if custom_syntax != "" else (module_variable + ".")}{function_name}",
             parameters,
             expected_result,
-            custom_syntax
+            custom_syntax,
+            index,
+            hash
         ))
         result.append("")
 
@@ -179,10 +205,10 @@ class Script:
 
         data = self.mainConfig.getTestData(language, script_path, function_name)
         # test block
-        for single_test in data:
-            parameters, expected_result = single_test
+        for index in range(len(data)):
+            parameters, expected_result = data[index]
 
-            result.extend(self.getFunction(language, script_path, function_name, parameters, expected_result))
+            result.extend(self.getFunction(language, script_path, function_name, parameters, expected_result, index=index))
 
         return result
 
