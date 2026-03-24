@@ -43,7 +43,7 @@ class Script:
 
         return result
 
-    def getFunctionHead(self, language: str, module_name: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], function_index: int = 0, hash: str = "") -> str:
+    def getFunctionHead(self, language: str, module_name: str, function_name: str, parameters: str, expected_result: str, function_index: int = 0, hash: str = "") -> str:
         scheme = self.langConfig.getTestSyntaxScheme()["is_unequal_test"]
         test_header = scheme.replace(
             f"{self.langConfig.getVariable("module_name")}",
@@ -56,33 +56,33 @@ class Script:
             f"{function_index}"
         ).replace(
             f"{self.langConfig.getVariable("parameters")}",
-            ",".join(str(i) for i in parameters)
+            parameters
         ).replace(
             f"{self.langConfig.getVariable("expected_result")}",
-            str(expected_result[0])
+            expected_result
         ).replace(
             f"{self.langConfig.getVariable("generic_hash")}",
             hash
         )
         return test_header
 
-    def getFunctionCustom(self, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str) -> str:
+    def getFunctionCustom(self, function_name: str, parameters: str, expected_result: str, custom_syntax: str) -> str:
         function = "function"
         x_n = "x_n"
         y_n = "y_n"
 
         return f"{custom_syntax.replace(
             x_n,
-            ','.join(str(x) for x in parameters)
+            parameters
         ).replace(
             y_n,
-            ','.join(str(x) for x in expected_result)
+            expected_result
         ).replace(
             function,
             function_name
         )}"
 
-    def getFunctionBody(self, language: str, function_name: str, parameters: list[str|int|float], expected_result: list[str|int|float], custom_syntax: str = "", function_index: int = 0, hash: str = "") -> list[str]:
+    def getFunctionBody(self, language: str, function_name: str, parameters: str, expected_result: str, custom_syntax: str = "", function_index: int = 0, hash: str = "") -> list[str]:
         result: list[str] = []
 
         script_path = self.mainConfig.getScripts(language)[0]
@@ -103,10 +103,10 @@ class Script:
                     f"{variables["custom_test_case"]}",
                     f"{custom_syntax.replace(
                         x_n,
-                        ','.join(str(x) for x in parameters)
+                        parameters
                     ).replace(
                         y_n,
-                        ','.join(str(x) for x in expected_result)
+                        expected_result
                     ).replace(
                         function,
                         function_name
@@ -124,10 +124,10 @@ class Script:
                     f"{function_index}"
                 ).replace(
                     f"{variables["parameters"]}",
-                    ",".join(str(i) for i in parameters)
+                    parameters
                 ).replace(
                     f"{variables["expected_result"]}",
-                    str(expected_result[0])
+                    expected_result
                 ).replace(
                     f"{self.langConfig.getVariable("generic_hash")}",
                     hash
@@ -168,8 +168,8 @@ class Script:
             language: str,
             script_path: str,
             function_name: str,
-            parameters: list[str|int|float],
-            expected_result: list[str|int|float],
+            parameters: str,
+            expected_result: str,
             custom_syntax: str = "",
             index: int = 0
         ) -> list[str]:

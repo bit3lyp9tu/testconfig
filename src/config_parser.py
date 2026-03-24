@@ -103,7 +103,7 @@ class MainConfig:
     def _isCodeFileValid(self, script_path: str, file: str) -> bool:
         return script_path.split(".")[-1] == file.split(".")[-1] and Path(file).is_file()
 
-    def _typifyTestCaseToList(self, testCaseParameters: str, separator: str = ";") -> list[int | float | str]:
+    def _typifyTestCaseToList(self, testCaseParameters: str, separator: str = ";", has_string_encapsulation: bool = False) -> list[int | float | str]:
         typified_parameters: list[int | float | str] = []
 
         for parameter in testCaseParameters.split(separator):
@@ -115,7 +115,7 @@ class MainConfig:
                 if re.match(r'[-]?[0-9]*\.[0-9]*', parameter):
                     typified_parameters.append(float(parameter))
             else:
-                if parameter[0] == "'" and parameter[-1] == "'" or parameter[0] == '"' and parameter[-1] == '"':
+                if has_string_encapsulation and (parameter[0] == "'" and parameter[-1] == "'" or parameter[0] == '"' and parameter[-1] == '"'):
                     typified_parameters.append(parameter)
                 else:
                     typified_parameters.append("'" + str(parameter) + "'")
@@ -136,8 +136,8 @@ class MainConfig:
             self.custom_module_variables[lang].clear()
         # self.custom_module_variables = {langs: [] for langs in self.custom_module_variables.keys()}
 
-    def getTestData(self, lang: str, script_path: str, function: str) -> list[tuple[list[int | float | str], list[int | float | str]]]:
-        results: list[tuple[list[int | float | str], list[int | float | str]]] = []
+    def getTestData(self, lang: str, script_path: str, function: str) -> list[tuple[str,str]]:
+        results: list[tuple[str, str]] = []
 
         body = self.content[lang][script_path]["tests"][function]
 
@@ -146,24 +146,22 @@ class MainConfig:
             for test_case in body:
                 if " -> " in test_case:
                     data: tuple[str, str] = test_case.split(" -> ")
-                    x_n: list[int | float | str] = self._typifyTestCaseToList(data[0])
-                    y_n: list[int | float | str] = self._typifyTestCaseToList(data[1])
+                    x_n: str = str(self._typifyTestCaseToList(data[0], has_string_encapsulation=True))[1:-1]
+                    y_n: str = str(self._typifyTestCaseToList(data[1], has_string_encapsulation=True))[1:-1]
 
                     results.append((x_n, y_n))
         else:
             # use data from csv file
             path: str = body["csv_path"]
-            print(f"{path}:{lang}/{script_path}/{function} -> {self.isPointingToCsvFile(lang, script_path, function)}")
             if self.isPointingToCsvFile(lang, script_path, function):
                 with open(path, 'r') as file:
                     lines = csv.reader(file, delimiter=';')
                     for param in list(lines)[1:]:
                         if param[0] == function:
-                            x2_n: list[int | float | str] = self._typifyTestCaseToList(param[1].replace("[", "").replace("]", ""), separator=",")
-                            y2_n: list[int | float | str] = self._typifyTestCaseToList(param[2].replace("[", "").replace("]", ""), separator=",")
+                            x2_n: str = param[1][1:-1]
+                            y2_n: str = param[2][1:-1]
 
                             results.append((x2_n, y2_n))
-
         return results
 
     def getHooks(self) -> dict[str, dict]:
