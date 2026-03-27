@@ -6,8 +6,10 @@ general_setup:
         - 'echo Testing'
 python:
     file_setup:
-    # src/config_parser.py:
-    #     tests:
+    src/config_parser.py:
+        tests:
+            path:
+                csv_path: 'selftest/data/main_config_data.csv'
     src/file_builder.py:
         tests:
             Script.hash_string:
@@ -24,13 +26,13 @@ python:
                 csv_path: 'selftest/data/code_builder_data.csv'
             _isCodeFileValid:
                 csv_path: 'selftest/data/code_builder_data.csv'
-    # src/hook.py:
-    #     tests:
-    # src/layer.py:
-    #     tests:
-    # src/log_level.py:
-    #     tests:
-    # src/prototype.py:
-    #     tests:
+    src/hook.py:
+        tests:
+    src/layer.py:
+        tests:
+    src/log_level.py:
+        tests:
+    src/prototype.py:
+        tests:
     file_shutdown:
 general_shutdown:

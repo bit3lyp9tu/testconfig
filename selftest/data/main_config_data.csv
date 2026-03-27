@@ -1,0 +1,2 @@
+function;x_n;y_n;syntax
+path;[];["../tests/configs/config1.yaml"];MainConfig("../tests/configs/config1.yaml").function != y_n
