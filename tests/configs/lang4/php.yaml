@@ -20,10 +20,11 @@ unit-test:
           - "<?php"
           - "include '%file_path%';"
         single_test_code:
-            - is_equal_test:
+            is_equal_test:
                 scheme: 'if (%function_name%(%parameters%) == %expected_result%) {}'
-            - is_unequal_test:
+            is_unequal_test:
                 scheme: 'if (%function_name%(%parameters%) != %expected_result%) {throw new Exception("Test Failed");}'
+                custom_scheme: 'if %module_name%.%custom_test_case%:'
         if_success:
             run:
                 exit_code: 0

@@ -115,7 +115,7 @@ class MainConfig:
                 if re.match(r'[-]?[0-9]*\.[0-9]*', parameter):
                     typified_parameters.append(float(parameter))
             else:
-                if has_string_encapsulation and (parameter[0] == "'" and parameter[-1] == "'" or parameter[0] == '"' and parameter[-1] == '"'):
+                if (parameter[0] == "'" or parameter[-1] == "'" or parameter[0] == '"' or parameter[-1] == '"'):
                     typified_parameters.append(parameter)
                 else:
                     typified_parameters.append(str(parameter))
@@ -136,8 +136,8 @@ class MainConfig:
             self.custom_module_variables[lang].clear()
         # self.custom_module_variables = {langs: [] for langs in self.custom_module_variables.keys()}
 
-    def getTestData(self, lang: str, script_path: str, function: str) -> list[tuple[str,str]]:
-        results: list[tuple[str, str]] = []
+    def getTestData(self, lang: str, script_path: str, function: str) -> list[tuple[str,str,str]]:
+        results: list[tuple[str, str, str]] = []
 
         body = self.content[lang][script_path]["tests"][function]
 
@@ -146,10 +146,13 @@ class MainConfig:
             for test_case in body:
                 if " -> " in test_case:
                     data: tuple[str, str] = test_case.split(" -> ")
-                    x_n: str = str(self._typifyTestCaseToList(data[0], has_string_encapsulation=True))[1:-1]
-                    y_n: str = str(self._typifyTestCaseToList(data[1], has_string_encapsulation=True))[1:-1]
+                    x_n: str = str(self._typifyTestCaseToList(data[0], has_string_encapsulation=False))[1:-1]
+                    y_n: str = str(self._typifyTestCaseToList(data[1], has_string_encapsulation=False))[1:-1]
 
-                    results.append((x_n, y_n))
+                    if len(y_n) > 1 and y_n[0] == '"':
+                        y_n = y_n[1:-1]
+
+                    results.append((x_n, y_n, ""))
         else:
             # use data from csv file
             path: str = body["csv_path"]
@@ -161,7 +164,7 @@ class MainConfig:
                             x2_n: str = param[1][1:-1]
                             y2_n: str = param[2][1:-1]
 
-                            results.append((x2_n, y2_n))
+                            results.append((x2_n, y2_n, param[3] if len(param) == 4 else ""))
         return results
 
     def getHooks(self) -> dict[str, dict]:
@@ -295,12 +298,8 @@ class LangConfig:
             return []
         return content["footer_data"]
 
-    def getTestSyntaxScheme(self) -> dict[str, str]:
-        return {
-            list(test_types.keys())[0]:
-            test_types[list(test_types.keys())[0]]["scheme"]
-            for test_types in self.content["unit-test"]["syntax_scheme"]["single_test_code"]
-        }
+    def getTestSyntaxScheme(self) -> dict:
+        return self.content["unit-test"]["syntax_scheme"]["single_test_code"]
 
     # TODO: needs testing
     def getFailMessages(self) -> dict:

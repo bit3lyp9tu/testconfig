@@ -93,6 +93,7 @@ class RunController:
         output: list[str] = []
 
         demo_file_name = "demo_file"
+        show_error_msg = True
 
         used_general_config_language = "python" # TODO: implement logic to determine which language to use
 
@@ -120,6 +121,13 @@ class RunController:
                 self.LOGS.print(1, msg)
                 Writer(code_lines.getAllTests(language_name)).write(generated_file_name, False)
 
+                #   chmod generated file
+                script_result2, exit_code2 = CommandRunner.runCommand(f"sudo chmod +x ./{generated_file_name}")
+                if exit_code2 != 0:
+                    msg = f"{script_result2}: {exit_code2}"
+                    output.append(msg)
+                    self.LOGS.print(2, msg)
+
                 #   execute script file
                 msg = f"[File Manager] execute script file [{generated_file_name}]..."
                 output.append(msg)
@@ -130,6 +138,11 @@ class RunController:
                     msg = f"[yellow1][Test] Test in [./{generated_file_name}] failed! (Exit code: {exit_code}) [/yellow1]"
                     output.append(msg)
                     self.LOGS.print(2, msg)
+                    if show_error_msg:
+                        output.extend(script_result)
+                        for line in script_result:
+                            if line != "":
+                                self.LOGS.print(2, line)
 
                 #   delete script file
                 if keep_scripts == False:

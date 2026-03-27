@@ -99,8 +99,13 @@ def test_langConfig_syntax_scheme() -> None:
     """
     result = langConfig1.getTestSyntaxScheme()
     assert result == {
-        "is_equal_test": "if %module_name%.%function_name%(%parameters%) == %expected_result%:",
-        "is_unequal_test": "if %module_name%.%function_name%(%parameters%) != %expected_result%:",
+        "is_equal_test": {
+            "scheme": "if %module_name%.%function_name%(%parameters%) == %expected_result%:"
+        },
+        "is_unequal_test": {
+            "custom_scheme": "if %module_name%.%custom_test_case%:",
+            "scheme": "if %module_name%.%function_name%(%parameters%) != %expected_result%:"
+        },
     }
 
 def test_langConfig_fail_message() -> None:

@@ -28,10 +28,11 @@ unit-test:
             - '%module_name% = importlib.util.module_from_spec(spec) # type: ignore'
             - 'spec.loader.exec_module(%module_name%) # type: ignore'
         single_test_code:
-            - is_equal_test:
+            is_equal_test:
                 scheme: 'if %module_name%.%function_name%(%parameters%) == %expected_result%:'
-            - is_unequal_test:
+            is_unequal_test:
                 scheme: 'if %module_name%.%function_name%(%parameters%) != %expected_result%:'
+                custom_scheme: 'if %module_name%.%custom_test_case%:'
         if_success:
             run:
                 exit_code: 0

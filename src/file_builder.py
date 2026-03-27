@@ -43,9 +43,21 @@ class Script:
 
         return result
 
-    def getFunctionHead(self, language: str, module_name: str, function_name: str, parameters: str, expected_result: str, function_index: int = 0, hash: str = "") -> str:
-        scheme = self.langConfig.getTestSyntaxScheme()["is_unequal_test"]
-        test_header = scheme.replace(
+    def getFunctionHead(
+            self,
+            language: str,
+            module_name: str,
+            function_name: str,
+            parameters: str,
+            expected_result: str,
+            function_index: int = 0,
+            hash: str = "",
+            custom_test_case: str = ""
+        ) -> str:
+        scheme: dict = self.langConfig.getTestSyntaxScheme()["is_unequal_test"]
+        mode = scheme.get("custom_scheme", "") if custom_test_case != "" else scheme.get("scheme", "")
+
+        test_header = mode.replace(
             f"{self.langConfig.getVariable("module_name")}",
             module_name
         ).replace(
@@ -63,6 +75,9 @@ class Script:
         ).replace(
             f"{self.langConfig.getVariable("generic_hash")}",
             hash
+        ).replace(
+            f"{self.langConfig.getVariable("custom_test_case")}",
+            custom_test_case
         )
         return test_header
 
@@ -181,10 +196,16 @@ class Script:
         reference_lines, module_variable = self.getReferenceHead(language, script_path, function_name)
         result.extend(reference_lines)
 
-        function_head = self.getFunctionHead(language, module_variable, function_name, parameters, expected_result, index, hash)
-
-        if custom_syntax != "":
-            function_head = self.getFunctionCustom(function_name, parameters, expected_result, custom_syntax)
+        function_head = self.getFunctionHead(
+            language,
+            module_variable,
+            function_name,
+            parameters,
+            expected_result,
+            index,
+            hash,
+            self.getFunctionCustom(function_name, parameters, expected_result, custom_syntax) if custom_syntax != "" else ""
+        )
 
         result.append(function_head)
         result.extend(self.getFunctionBody(
@@ -206,9 +227,9 @@ class Script:
         data = self.mainConfig.getTestData(language, script_path, function_name)
         # test block
         for index in range(len(data)):
-            parameters, expected_result = data[index]
+            parameters, expected_result, custom_syntax = data[index]
 
-            result.extend(self.getFunction(language, script_path, function_name, parameters, expected_result, index=index))
+            result.extend(self.getFunction(language, script_path, function_name, parameters, expected_result, index=index, custom_syntax=custom_syntax))
 
         return result
 

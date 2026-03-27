@@ -6,8 +6,8 @@ general_setup:
         - 'echo Testing'
 python:
     file_setup:
-    src/config_parser.py:
-        tests:
+    # src/config_parser.py:
+    #     tests:
     src/file_builder.py:
         tests:
             Script.hash_string:
@@ -17,18 +17,20 @@ python:
             getImports:
                 csv_path: 'selftest/data/code_builder_data.csv'
             getFunctionHead:
-                - python;test_module;add;[1,2,3],[6] -> 'if test_module.add(1,2,3) != 6'
+                csv_path: 'selftest/data/code_builder_data.csv'
             getFunctionBody:
                 csv_path: 'selftest/data/code_builder_data.csv'
             getFunctionCustom:
                 csv_path: 'selftest/data/code_builder_data.csv'
-    src/hook.py:
-        tests:
-    src/layer.py:
-        tests:
-    src/log_level.py:
-        tests:
-    src/prototype.py:
-        tests:
+            _isCodeFileValid:
+                csv_path: 'selftest/data/code_builder_data.csv'
+    # src/hook.py:
+    #     tests:
+    # src/layer.py:
+    #     tests:
+    # src/log_level.py:
+    #     tests:
+    # src/prototype.py:
+    #     tests:
     file_shutdown:
 general_shutdown:
