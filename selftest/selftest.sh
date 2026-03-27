@@ -5,4 +5,5 @@ env/bin/python3 -m src.prototype \
             --lang_config_dict ../selftest/lang \
             --test_path selftest \
             --debug_level 0 \
-            --keep_script_files true
+            --keep_script_files true \
+            --show_script_error_msg true

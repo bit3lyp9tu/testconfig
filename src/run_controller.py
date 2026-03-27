@@ -89,11 +89,10 @@ class RunController:
         return output_stream
 
 
-    def start(self, directory: str, keep_scripts: bool = True) -> list[str]:
+    def start(self, directory: str, keep_scripts: bool = True, show_script_error_msg: bool = True) -> list[str]:
         output: list[str] = []
 
         demo_file_name = "demo_file"
-        show_error_msg = True
 
         used_general_config_language = "python" # TODO: implement logic to determine which language to use
 
@@ -138,7 +137,7 @@ class RunController:
                     msg = f"[yellow1][Test] Test in [./{generated_file_name}] failed! (Exit code: {exit_code}) [/yellow1]"
                     output.append(msg)
                     self.LOGS.print(2, msg)
-                    if show_error_msg:
+                    if show_script_error_msg:
                         output.extend(script_result)
                         for line in script_result:
                             if line != "":

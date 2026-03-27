@@ -34,6 +34,9 @@ def main():
         "-k", "--keep_script_files", help="keep the generated script files from being deleted after execution", type=str2bool, default=False
     )
     parser.add_argument(
+        "-s", "--show_script_error_msg", help="if a test fails, the error message will be shown", type=str2bool, default=True
+    )
+    parser.add_argument(
         "-r", "--report", help="set the name of the output file for the test report", type=str, default="test_report.txt"
     )
     parser.add_argument(
@@ -58,7 +61,8 @@ def main():
     Writer(
         tester.start(
             args.test_path,
-            bool(args.keep_script_files)
+            bool(args.keep_script_files),
+            bool(args.show_script_error_msg)
         )
     ).write(args.report, False)
     # try:
